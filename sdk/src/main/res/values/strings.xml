@@ -1,0 +1,28 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="record">Record</string>
+    <string name="stop">Stop</string>
+    <string name="uploading_captured_data">Uploading the captured data to analyze them…</string>
+    <string name="processing_captured_data">Analyzing…</string>
+    <string name="shared_pref">Smart Spectra</string>
+    <string name="checkup">CHECKUP</string>
+    <string name="checkup_description">This is checkup button</string>
+    <string name="info_description">This is info button</string>
+    <string name="terms_of_services">Terms of service</string>
+    <string name="instruction_of_use">Instruction of use</string>
+    <string name="privacy_policy">Privacy policy</string>
+    <string name="contact_us">Contact us</string>
+    <string name="show_tutorial">Show tutorial</string>
+    <string name="hr_rr">HR and RR:</string>
+    <string name="rr_hr_empty" tools:ignore="TypographyDashes">RR : -- HR : --</string>
+    <string name="rr_hr_values">RR : %1$d HR : %2$d</string>
+    <string name="rr_hr_hint">.....</string>
+    <string name="loading_hint">Preparing…</string>
+    <string name="no_face_found">No face found</string>
+    <string name="too_many_face">Too many faces</string>
+    <string name="face_is_not_centered">Face is not centered</string>
+    <string name="face_distance">Face not right distance from the camera</string>
+    <string name="image_too_dark">Image too dark</string>
+    <string name="not_enough_chest">Not enough chest in view</string>
+    <string name="all_good">All good</string>
+    <string name="camera_permission_denied">Camera permission was denied. Please open settings and allow camera permission.</string>
+</resources>
