@@ -2,6 +2,7 @@ plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("maven-publish")
+    id("signing")
 }
 
 android {
@@ -46,19 +47,6 @@ android {
     }
 }
 
-publishing {
-    publications {
-        create<MavenPublication>("release") {
-            afterEvaluate {
-                from(components["release"])
-            }
-            groupId = "com.presagetech"
-            artifactId = "physiology"
-            version = "1.0.0-SNAPSHOT"
-        }
-    }
-}
-
 dependencies {
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
@@ -83,4 +71,31 @@ dependencies {
 
     // mediapipe java library
     implementation(files("libs/classes.jar"))
+}
+
+task<Javadoc>("androidJavadoc") {
+    exclude("**/R.html", "**/R.*.html", "**/index.html")
+    options.encoding = "UTF-8"
+}
+
+signing {
+    sign(publishing.publications)
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("release") {
+            afterEvaluate {
+                from(components["release"])
+            }
+            groupId = "com.presagetech.physiology"
+            artifactId = "sdk"
+            version = "1.0.0-SNAPSHOT"
+            pom {
+                name.set("Physiology SDK")
+                description.set("Heart and respiration rate measurement by Presage Technologies")
+                url.set("https://physiology.presagetech.com/")
+            }
+        }
+    }
 }
