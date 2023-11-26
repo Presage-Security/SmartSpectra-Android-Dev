@@ -56,15 +56,10 @@ class UploadingFragment : Fragment() {
         }
         viewModel.rrHRAveragePairLiveData.observe(viewLifecycleOwner) {
             requireActivity().setResult(Activity.RESULT_OK, Intent().apply {
-                putExtra(RR_RESULT_KEY, it.rrAverage)
-                putExtra(HR_RESULT_KEY, it.hrAverage)
+                putExtra(SmartSpectraActivity.RESULT_HR_KEY, it.hrAverage)
+                putExtra(SmartSpectraActivity.RESULT_RR_KEY, it.rrAverage)
             })
             requireActivity().finish()
         }
-    }
-
-    companion object {
-        const val RR_RESULT_KEY = "rr"
-        const val HR_RESULT_KEY = "hr"
     }
 }

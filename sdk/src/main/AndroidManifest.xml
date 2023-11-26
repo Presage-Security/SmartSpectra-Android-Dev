@@ -8,19 +8,11 @@
             android:name=".ui.WalkThroughActivity"
             android:exported="false"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.Transparent">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
-        </activity>
+            android:theme="@style/Theme.Transparent" />
         <activity
             android:name=".ui.SmartSpectraActivity"
             android:exported="false"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
-        </activity>
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
     </application>
 </manifest>

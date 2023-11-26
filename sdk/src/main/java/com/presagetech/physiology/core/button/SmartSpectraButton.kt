@@ -1,31 +1,26 @@
 package com.presagetech.physiology.core.button
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
+import android.content.pm.PackageManager
 import android.graphics.Rect
 import android.net.Uri
 import android.util.AttributeSet
-import android.util.TypedValue
 import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import androidx.core.view.doOnLayout
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.presagetech.physiology.R
-import com.presagetech.physiology.core.SmartSpectra
-import com.presagetech.physiology.core.result.SmartSpectraResultView
+import com.presagetech.physiology.core.ScreeningContract
+import com.presagetech.physiology.core.ScreeningContractInput
+import com.presagetech.physiology.core.result.SmartSpectraResultListener
 import com.presagetech.physiology.ui.WalkThroughActivity
-import com.presagetech.physiology.ui.summary.UploadingFragment
 import com.presagetech.physiology.utils.PreferencesUtils
 import org.json.JSONArray
 import org.json.JSONObject
@@ -33,21 +28,51 @@ import kotlin.math.roundToInt
 
 
 class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(context, attrs) {
-
-    private var resultView: SmartSpectraResultView? = null
-    private var checkupLinearLayout: LinearLayout? = null
-    private var heartIcon: AppCompatImageView? = null
-    private var titleTextView: AppCompatTextView? = null
-    private var infoIconFrame: FrameLayout? = null
-    private var infoIcon: AppCompatImageView? = null
-
+    private val BASE_URL = "https://api.physiology.presagetech.com"
     private val linksMap = mapOf(
-        R.id.txt_terms_of_service to "https://api.physiology.presagetech.com/termsofservice",
-        R.id.txt_privacy_policy to "https://api.physiology.presagetech.com/privacypolicy",
-        R.id.txt_instruction_of_use to "https://api.physiology.presagetech.com/instructions ",
-        R.id.txt_contact_us to "https://api.physiology.presagetech.com/contact",
-        R.id.txt_contact_us to "https://api.physiology.presagetech.com/contact",
+        R.id.txt_terms_of_service to "$BASE_URL/termsofservice",
+        R.id.txt_privacy_policy to "$BASE_URL/privacypolicy",
+        R.id.txt_instruction_of_use to "$BASE_URL/instructions ",
+        R.id.txt_contact_us to "$BASE_URL/contact",
+        R.id.txt_contact_us to "$BASE_URL/contact",
     )
+
+    private var checkupButton: View
+    private var infoButton: View
+
+    private var tutorialHasBeenShown: Boolean
+    private var apiKey: String? = null
+    private var resultListener: SmartSpectraResultListener? = null
+
+    init {
+        tutorialHasBeenShown =
+            PreferencesUtils.getBoolean(context, PreferencesUtils.Tutorial_Key, false)
+        val appInfo = context.packageManager.getApplicationInfo(
+            context.packageName,
+            PackageManager.GET_META_DATA
+        )
+        apiKey = appInfo.metaData?.getString(MANIFEST_KEY)
+
+        orientation = HORIZONTAL
+        gravity = Gravity.CENTER_VERTICAL
+        background = ContextCompat.getDrawable(context, R.drawable.smart_spectra_button_background)
+        LayoutInflater.from(context).inflate(R.layout.view_start_button, this, true)
+
+        checkupButton = findViewById(R.id.button_checkup)
+        setOnClickListener(this::onStartClicked)
+
+        infoButton = findViewById(R.id.button_info)
+        infoButton.doOnLayout { showTutorialIfNecessary() }
+        infoButton.setOnClickListener { infoBottomSheetDialog.show() }
+    }
+
+    fun setApiKey(apiKey: String) {
+        this.apiKey = apiKey
+    }
+
+    fun setResultListener(listener: SmartSpectraResultListener) {
+        this.resultListener = listener
+    }
 
     private val infoBottomSheetDialog: BottomSheetDialog by lazy {
         val dialog = BottomSheetDialog(context).also {
@@ -60,129 +85,50 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
         }
         dialog.findViewById<AppCompatTextView>(R.id.show_tutorial)!!.setOnClickListener {
             dialog.dismiss()
-            infoIconFrame?.post {
-                PreferencesUtils.saveBoolean(context, PreferencesUtils.Tutorial_Key, false)
-                openWalkThrough(context)
-            }
+            openWalkThrough(context)
         }
         dialog
     }
 
-    var cameraProcessResult: ActivityResultLauncher<Intent> =
-        (context as AppCompatActivity).registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult()
-        ) {
-            val data = it.data
-            if (it.resultCode == Activity.RESULT_OK && data != null) {
-                require(data.hasExtra(UploadingFragment.RR_RESULT_KEY))
-                val rr = data.getDoubleExtra(UploadingFragment.RR_RESULT_KEY, 0.0)
-                require(data.hasExtra(UploadingFragment.HR_RESULT_KEY))
-                val hr = data.getDoubleExtra(UploadingFragment.HR_RESULT_KEY, 0.0)
-                resultView?.showData(rr.toInt(), hr.toInt())
-            } else {
-                resultView?.showEmptyData()
-            }
-        }
-
-    init {
-        gravity = Gravity.CENTER_VERTICAL
-        background = ContextCompat.getDrawable(context, R.drawable.smart_spectra_button_background)
-
-        checkupLinearLayout = LinearLayout(context).apply {
-
-            gravity = Gravity.CENTER_VERTICAL
-            heartIcon = AppCompatImageView(context).apply {
-                setImageResource(R.drawable.ic_baseline_favorite_24)
-            }
-            addView(
-                heartIcon,
-                LayoutParams(
-                    LayoutParams.WRAP_CONTENT,
-                    LayoutParams.WRAP_CONTENT
-                ).apply {
-                    setPadding(dpToPx(16), 0, dpToPx(16), 0)
-                }
-            )
-
-            titleTextView = AppCompatTextView(context).apply {
-                setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18f)
-                text = context.getString(R.string.checkup)
-                setTextColor(Color.WHITE)
-            }
-            addView(
-                titleTextView,
-                LayoutParams(
-                    0,
-                    LayoutParams.WRAP_CONTENT
-                ).apply {
-                    weight = 1f
-                }
-            )
-        }
-        addView(
-            checkupLinearLayout,
-            LayoutParams(
-                0,
-                LayoutParams.MATCH_PARENT
-            ).apply {
-                weight = 1f
-            }
-        )
-
-        infoIconFrame = FrameLayout(context).apply {
-            setPadding(dpToPx(16), 0, dpToPx(16), 0)
-            background =
-                ContextCompat.getDrawable(context, R.drawable.smart_spectra_info_button_background)
-            infoIcon = AppCompatImageView(context).apply {
-                setImageResource(R.drawable.ic_info_24)
-            }
-            addView(
-                infoIcon,
-                FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                ).apply {
-                    gravity = Gravity.CENTER
-                }
-            )
-        }
-        addView(
-            infoIconFrame,
-            LayoutParams(
-                LayoutParams.WRAP_CONTENT,
-                LayoutParams.MATCH_PARENT
-            )
-        )
-
-        setOnClickListener {
-            SmartSpectra.createScreeningPage(context as AppCompatActivity, cameraProcessResult)
-        }
-        infoIconFrame?.doOnLayout {
+    private fun showTutorialIfNecessary() {
+        if (!tutorialHasBeenShown) {
             openWalkThrough(context)
-        }
-        infoIconFrame?.setOnClickListener {
-            infoBottomSheetDialog.show()
         }
     }
 
-    private fun openWalkThrough(context: Context) {
-        if (!PreferencesUtils.getBoolean(context, PreferencesUtils.Tutorial_Key, false)) {
-            val rootLocation = getViewLocation(this@SmartSpectraButton)
-            val intent = Intent(context, WalkThroughActivity::class.java).apply {
-                putExtra("data", generateViewsLocationJson().toString())
-                putExtra("top", rootLocation.top)
-                putExtra("bottom", rootLocation.bottom)
-            }
-            context.startActivity(intent)
+    private var screeningActivityLauncher: ActivityResultLauncher<ScreeningContractInput> =
+        (context as AppCompatActivity).registerForActivityResult(ScreeningContract()) {
+            val listener = resultListener ?: throw IllegalStateException("resultListener is null")
+            listener.onResult(it)
         }
 
+    private fun onStartClicked(view: View) {
+        require(resultListener != null) { "Have you forgotten to set the result listener?" }
+        val key = apiKey ?: throw IllegalStateException(
+            "SDK API key is missing. " +
+                    "It was not found in AndroidManifest.xml meta-data $MANIFEST_KEY, " +
+                    "nor was it set via the .setApiKey() method. " +
+                    "Please refer to the documentation for more details."
+        )
+        screeningActivityLauncher.launch(ScreeningContractInput(key))
+    }
+
+    private fun openWalkThrough(context: Context) {
+        val rootLocation = getViewLocation(this@SmartSpectraButton)
+        val intent = Intent(context, WalkThroughActivity::class.java).apply {
+            putExtra("data", generateViewsLocationJson().toString())
+            putExtra("top", rootLocation.top)
+            putExtra("bottom", rootLocation.bottom)
+        }
+        context.startActivity(intent)
+        tutorialHasBeenShown = true
     }
 
     private fun generateViewsLocationJson(): JSONArray {
         return JSONArray().apply {
             put(
                 JSONObject().apply {
-                    val rect = getViewLocation(checkupLinearLayout!!)
+                    val rect = getViewLocation(checkupButton)
                     put("left", rect.left)
                     put("top", rect.top)
                     put("right", rect.right)
@@ -192,7 +138,7 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
             )
             put(
                 JSONObject().apply {
-                    val rect = getViewLocation(infoIconFrame!!)
+                    val rect = getViewLocation(infoButton)
                     put("left", rect.left)
                     put("top", rect.top)
                     put("right", rect.right)
@@ -211,15 +157,6 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
         return Rect(x, y, x + view.width, y + view.height)
     }
 
-    private fun dpToPx(dp: Int): Int {
-        val density = context.resources.displayMetrics.density
-        return (dp * density).roundToInt()
-    }
-
-    fun setupResultView(resultView: SmartSpectraResultView) {
-        this.resultView = resultView
-    }
-
     private fun openInWebView(url: String) {
         val uri = Uri.parse(url)
         val intent = Intent(Intent.ACTION_VIEW, uri)
@@ -230,5 +167,14 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
         val desiredHeight = dpToPx(56)
         val heightSpec = MeasureSpec.makeMeasureSpec(desiredHeight, MeasureSpec.EXACTLY)
         super.onMeasure(widthMeasureSpec, heightSpec)
+    }
+
+    private fun dpToPx(dp: Int): Int {
+        val density = context.resources.displayMetrics.density
+        return (dp * density).roundToInt()
+    }
+
+    companion object {
+        const val MANIFEST_KEY = "com.presagetech.physiology.api_key"
     }
 }

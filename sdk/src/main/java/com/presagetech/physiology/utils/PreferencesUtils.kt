@@ -3,13 +3,8 @@ package com.presagetech.physiology.utils
 import android.content.Context
 import com.presagetech.physiology.R
 
-/**
- * This class use for handling local storage staffs
- */
-
 object PreferencesUtils {
-
-    const val Tutorial_Key = "tutorial"
+    const val Tutorial_Key = "tutorial_has_been_shown"
 
     fun saveBoolean(context: Context, key: String, boolean: Boolean) {
         val pref = context.getSharedPreferences(

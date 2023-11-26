@@ -19,7 +19,7 @@
         </activity>
 
         <meta-data
-            android:name="smart_spectra_token"
+            android:name="com.presagetech.physiology.api_key"
             android:value="0NYqErApXtwP0EWbXajK5ojl7Y9jVcZ9rpgnoeji" />
     </application>
 </manifest>

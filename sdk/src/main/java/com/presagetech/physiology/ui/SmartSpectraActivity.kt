@@ -34,12 +34,18 @@ class SmartSpectraActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        apiKey = intent.getStringExtra("apiKey")!!
+        apiKey = intent.getStringExtra(EXTRA_API_KEY) ?: throw IllegalArgumentException("API key is missing")
         viewModelFactory = ScreeningViewModelFactory(SDKApiService(apiKey))
 
         setContentView(R.layout.activity_main_layout_nav)
         supportFragmentManager.beginTransaction().replace(
             R.id.host_fragment, cameraProcessFragment
         ).commit()
+    }
+
+    companion object {
+        const val EXTRA_API_KEY = "apiKey"
+        const val RESULT_HR_KEY = "hr"
+        const val RESULT_RR_KEY = "rr"
     }
 }
