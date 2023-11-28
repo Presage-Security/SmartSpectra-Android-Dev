@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.presagetech.physiology"
+    namespace = "com.presagetech.smartspectra"
     compileSdk = 34
 
     defaultConfig {
@@ -88,8 +88,8 @@ publishing {
             afterEvaluate {
                 from(components["release"])
             }
-            groupId = "com.presagetech.physiology"
-            artifactId = "sdk"
+            groupId = "com.presagetech"
+            artifactId = "smartspectra"
             version = "1.0.0-SNAPSHOT"
             pom {
                 name.set("Physiology SDK")

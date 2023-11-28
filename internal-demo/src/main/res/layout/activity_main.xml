@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-        <com.presagetech.physiology.core.button.SmartSpectraButton
+        <com.presagetech.smartspectra.core.button.SmartSpectraButton
         android:id="@+id/btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -16,7 +16,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <com.presagetech.physiology.core.result.SmartSpectraResultView
+    <com.presagetech.smartspectra.core.result.SmartSpectraResultView
         android:id="@+id/result_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -2,8 +2,8 @@ package com.presagetech.internal_demo
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.presagetech.physiology.core.button.SmartSpectraButton
-import com.presagetech.physiology.core.result.SmartSpectraResultView
+import com.presagetech.smartspectra.core.button.SmartSpectraButton
+import com.presagetech.smartspectra.core.result.SmartSpectraResultView
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
