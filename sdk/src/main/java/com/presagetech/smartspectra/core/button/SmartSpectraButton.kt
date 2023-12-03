@@ -20,10 +20,9 @@ import com.presagetech.smartspectra.R
 import com.presagetech.smartspectra.core.ScreeningContract
 import com.presagetech.smartspectra.core.ScreeningContractInput
 import com.presagetech.smartspectra.core.result.SmartSpectraResultListener
+import com.presagetech.smartspectra.ui.WalkActivityParams
 import com.presagetech.smartspectra.ui.WalkThroughActivity
 import com.presagetech.smartspectra.utils.PreferencesUtils
-import org.json.JSONArray
-import org.json.JSONObject
 import kotlin.math.roundToInt
 
 
@@ -114,39 +113,16 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
     }
 
     private fun openWalkThrough(context: Context) {
-        val rootLocation = getViewLocation(this@SmartSpectraButton)
+        val params = WalkActivityParams(
+            rootPosition = getViewLocation(this@SmartSpectraButton),
+            checkupPosition = getViewLocation(checkupButton),
+            infoPosition = getViewLocation(infoButton),
+        )
         val intent = Intent(context, WalkThroughActivity::class.java).apply {
-            putExtra("data", generateViewsLocationJson().toString())
-            putExtra("top", rootLocation.top)
-            putExtra("bottom", rootLocation.bottom)
+            putExtra(WalkThroughActivity.EXTRA_PARAMS, params)
         }
         context.startActivity(intent)
         tutorialHasBeenShown = true
-    }
-
-    private fun generateViewsLocationJson(): JSONArray {
-        return JSONArray().apply {
-            put(
-                JSONObject().apply {
-                    val rect = getViewLocation(checkupButton)
-                    put("left", rect.left)
-                    put("top", rect.top)
-                    put("right", rect.right)
-                    put("bottom", rect.bottom)
-                    put("description", resources.getString(R.string.checkup_description))
-                }
-            )
-            put(
-                JSONObject().apply {
-                    val rect = getViewLocation(infoButton)
-                    put("left", rect.left)
-                    put("top", rect.top)
-                    put("right", rect.right)
-                    put("bottom", rect.bottom)
-                    put("description", resources.getString(R.string.info_description))
-                }
-            )
-        }
     }
 
     private fun getViewLocation(view: View): Rect {

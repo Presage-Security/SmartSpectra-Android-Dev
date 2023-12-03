@@ -36,17 +36,22 @@ class WalkThroughActivity : AppCompatActivity() {
         }
 
         val statusBarHeight = calculateStatusBarHeight()
-
-        val jsonString = intent.getStringExtra("data")
-        val topOfView = intent.getIntExtra("top", 0)
-        val bottomOfView = intent.getIntExtra("bottom", 0)
-
-        val maskedViews = convertInputJsonToMaskedViewArray(jsonString, statusBarHeight)
-
-        //Calculate text view position
-        calculateTextViewPosition(topOfView, bottomOfView)
-
-        //Start masking scenario
+        val params = intent.getParcelableExtra<WalkActivityParams>(EXTRA_PARAMS)!!
+        val maskedViews = listOf(
+            getString(R.string.checkup_description) to Rect(
+                params.checkupPosition.left,
+                params.checkupPosition.top - statusBarHeight,
+                params.checkupPosition.right,
+                params.checkupPosition.bottom - statusBarHeight
+            ),
+            getString(R.string.info_description) to Rect(
+                params.infoPosition.left,
+                params.infoPosition.top - statusBarHeight,
+                params.infoPosition.right,
+                params.infoPosition.bottom - statusBarHeight
+            ),
+        )
+        calculateTextViewPosition(params.rootPosition.top, params.rootPosition.bottom)
         startMasking(maskedViews)
     }
 
@@ -115,7 +120,7 @@ class WalkThroughActivity : AppCompatActivity() {
         }
     }
 
-    private fun startMasking(maskedViews: ArrayList<Pair<String, Rect>>) {
+    private fun startMasking(maskedViews: List<Pair<String, Rect>>) {
         var counter = 0
         setupMask(maskedViews[0])
         walkThroughLayout?.setOnClickListener {
@@ -140,4 +145,7 @@ class WalkThroughActivity : AppCompatActivity() {
         return displayMetrics.heightPixels
     }
 
+    companion object {
+        const val EXTRA_PARAMS = "params"
+    }
 }
