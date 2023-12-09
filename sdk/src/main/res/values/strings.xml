@@ -24,5 +24,7 @@
     <string name="image_too_dark">Image too dark</string>
     <string name="not_enough_chest">Not enough chest in view</string>
     <string name="all_good">All good</string>
-    <string name="camera_permission_denied">Camera permission was denied. Please open settings and allow camera permission.</string>
+    <string name="camera_permission_hint">Heart rate and respiratory rate measurements require camera permission.</string>
+    <string name="allow">Allow</string>
+    <string name="open_settings">Open settings</string>
 </resources>

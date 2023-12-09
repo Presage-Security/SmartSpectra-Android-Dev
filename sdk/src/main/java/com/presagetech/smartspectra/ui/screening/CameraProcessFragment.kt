@@ -7,7 +7,6 @@ import android.os.SystemClock
 import android.util.Size
 import android.view.*
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.Toolbar
@@ -71,8 +70,6 @@ class CameraProcessFragment : Fragment() {
     // consumed by {@link FrameProcessor} and the underlying MediaPipe graph.
     private var textureConverter: ExternalTextureConverter? = null
 
-    private var openUploadingFragmentCallback: (() -> Unit)? =  null
-
     private val viewModel: ScreeningViewModel by lazy {
         ViewModelProvider(
             requireActivity(),
@@ -85,7 +82,7 @@ class CameraProcessFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val view = inflater.inflate(R.layout.camera_process_fragment_layout, container, false).also {
+        val view = inflater.inflate(R.layout.fragment_camera_process_layout, container, false).also {
             timerTextView = it.findViewById(R.id.text_timer)
             hintText = it.findViewById(R.id.text_hint)
             recordingButton = it.findViewById(R.id.button_recording)
@@ -210,7 +207,7 @@ class CameraProcessFragment : Fragment() {
         if (Config.SAVE_JSONs) {
             saveJsonLocally(outputJson)
         }
-        openUploadingFragmentCallback!!.invoke()
+        (requireActivity() as SmartSpectraActivity).openUploadFragment()
     }
 
     private fun handleErrorCodePacket(packet: Packet?) {
@@ -229,6 +226,10 @@ class CameraProcessFragment : Fragment() {
     override fun onResume() {
         super.onResume()
 
+        if (!PermissionHelper.cameraPermissionsGranted(requireActivity())) {
+            throw RuntimeException("Handle camera permission in host activity")
+        }
+
         textureConverter = ExternalTextureConverter(
             eglManager!!.context, 2
         ).also {
@@ -236,11 +237,7 @@ class CameraProcessFragment : Fragment() {
             it.setConsumer(processor)
         }
 
-        if (PermissionHelper.cameraPermissionsGranted(requireActivity())) {
-            startCamera()
-        } else {
-            PermissionHelper.checkAndRequestCameraPermissions(requireActivity())
-        }
+        startCamera()
     }
 
     override fun onPause() {
@@ -249,24 +246,6 @@ class CameraProcessFragment : Fragment() {
         textureConverter!!.close()
         // Hide preview display until we re-open the camera again.
         previewDisplayView.isVisible = false
-    }
-
-    @Suppress("OVERRIDE_DEPRECATION")
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        PermissionHelper.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (PermissionHelper.cameraPermissionsGranted(requireActivity())) {
-            startCamera()
-        } else {
-            Toast.makeText(
-                requireContext(),
-                R.string.camera_permission_denied,
-                Toast.LENGTH_LONG
-            ).show()
-        }
     }
 
     private val previewSurfaceHolderCallback = object : SurfaceHolder.Callback {
@@ -319,10 +298,6 @@ class CameraProcessFragment : Fragment() {
         // Make the display view visible to start showing the preview. This triggers the
         // SurfaceHolder.Callback added to (the holder of) previewDisplayView.
         previewDisplayView.visibility = View.VISIBLE
-    }
-
-    fun setOpenUploadFragment(callback: () -> Unit){
-        this.openUploadingFragmentCallback = callback
     }
 
     @OptIn(DelicateCoroutinesApi::class)

@@ -32,7 +32,7 @@ class UploadingFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.uploading_fragment_layout, container, false).also {
+        val view = inflater.inflate(R.layout.fragment_uploading_layout, container, false).also {
             statusText = it.findViewById(R.id.text_status)
             progressBar = it.findViewById(R.id.progress_bar)
         }
