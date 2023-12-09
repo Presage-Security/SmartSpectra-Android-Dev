@@ -22,9 +22,10 @@ class PermissionsRequestFragment: Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_permissions_layout, container, false)
-        requestButton = view.findViewById(R.id.button_allow)
-        settingsButton = view.findViewById(R.id.button_open_settings)
+        val view = inflater.inflate(R.layout.fragment_permissions_layout, container, false).also {
+            requestButton = it.findViewById(R.id.button_allow)
+            settingsButton = it.findViewById(R.id.button_open_settings)
+        }
 
         requestButton.setOnClickListener {
             requestPermissionDialog()

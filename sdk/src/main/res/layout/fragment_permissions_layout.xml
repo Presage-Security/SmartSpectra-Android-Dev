@@ -10,18 +10,20 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:maxWidth="300dp"
-        android:padding="16dp"
+        android:padding="32dp"
         android:text="@string/camera_permission_hint" />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/button_allow"
+        style="?attr/materialButtonOutlinedStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:text="@string/allow" />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/button_open_settings"
+        style="?attr/materialButtonOutlinedStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"

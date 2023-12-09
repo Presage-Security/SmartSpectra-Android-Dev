@@ -26,6 +26,7 @@ class UploadingFragment : Fragment() {
 
     private lateinit var statusText: TextView
     private lateinit var progressBar: ProgressBar
+    private lateinit var retryButton: View
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -35,7 +36,16 @@ class UploadingFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_uploading_layout, container, false).also {
             statusText = it.findViewById(R.id.text_status)
             progressBar = it.findViewById(R.id.progress_bar)
+            retryButton = it.findViewById(R.id.button_retry)
         }
+
+        retryButton.setOnClickListener {
+            viewModel.viewModelScope.launch {
+                viewModel.startUploadingProcess()
+            }
+        }
+
+        toggleFailed(false)
         return view
     }
 
@@ -44,16 +54,7 @@ class UploadingFragment : Fragment() {
         viewModel.viewModelScope.launch {
             viewModel.startUploadingProcess()
         }
-        viewModel.uploadProgressLiveData.observe(viewLifecycleOwner) {
-            if (!it.processing) {
-                statusText.setText(R.string.uploading_captured_data)
-                progressBar.isIndeterminate = false
-                progressBar.progress = (it.uploading * 100).toInt()
-            } else {
-                statusText.text = getString(R.string.processing_captured_data)
-                progressBar.isIndeterminate = true
-            }
-        }
+        viewModel.uploadProgressLiveData.observe(viewLifecycleOwner, ::handleUploadingState)
         viewModel.rrHRAveragePairLiveData.observe(viewLifecycleOwner) {
             requireActivity().setResult(Activity.RESULT_OK, Intent().apply {
                 putExtra(SmartSpectraActivity.RESULT_HR_KEY, it.hrAverage)
@@ -61,5 +62,30 @@ class UploadingFragment : Fragment() {
             })
             requireActivity().finish()
         }
+    }
+
+    private fun handleUploadingState(state: UploadingState) {
+        toggleFailed(state is UploadingState.Failed)
+        when (state) {
+            is UploadingState.Failed -> {
+                statusText.setText(R.string.uploading_failed_hint)
+                progressBar.isIndeterminate = false
+                progressBar.progress = 0
+            }
+            is UploadingState.Processing -> {
+                statusText.setText(R.string.processing_captured_data)
+                progressBar.isIndeterminate = true
+            }
+            is UploadingState.Uploading -> {
+                statusText.setText(R.string.uploading_captured_data)
+                progressBar.isIndeterminate = false
+                progressBar.progress = (state.progress * 100).toInt()
+            }
+        }
+    }
+
+    private fun toggleFailed(failed: Boolean) {
+        progressBar.visibility = if (failed) View.GONE else View.VISIBLE
+        retryButton.visibility = if (failed) View.VISIBLE else View.GONE
     }
 }

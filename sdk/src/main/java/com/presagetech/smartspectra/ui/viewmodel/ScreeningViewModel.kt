@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.presagetech.smartspectra.network.SDKApiService
 import com.presagetech.smartspectra.network.model.ETag
+import com.presagetech.smartspectra.ui.summary.UploadingState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -13,6 +14,7 @@ import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
+import java.io.IOException
 import java.lang.Integer.min
 import java.util.zip.GZIPOutputStream
 
@@ -23,8 +25,8 @@ class ScreeningViewModel(
 
     private var jsonData: String? = null
 
-    private val _uploadProgressLiveData = MutableLiveData<UploadingProgress>()
-    val uploadProgressLiveData: LiveData<UploadingProgress> = _uploadProgressLiveData
+    private val _uploadProgressLiveData = MutableLiveData<UploadingState>()
+    val uploadProgressLiveData: LiveData<UploadingState> = _uploadProgressLiveData
 
     private val _rrHRAveragePairLiveData = MutableLiveData<RetrievedData>()
     val rrHRAveragePairLiveData: LiveData<RetrievedData> = _rrHRAveragePairLiveData
@@ -37,18 +39,24 @@ class ScreeningViewModel(
         val jsonData = jsonData ?: throw IllegalStateException("jsonData is null")
         val bytesToSend = gzipString2ByteArray(jsonData)
         Timber.i("json length=${jsonData.length}, compressed size=${bytesToSend.size}")
-        val uploadingURLBody = generateUploadURLRequestBody(bytesToSend.size)
-        val output = sdkApiService.postUploadURL(uploadingURLBody)
-            ?: throw IllegalStateException("output is null")
+        try {
+            _uploadProgressLiveData.postValue(UploadingState.Uploading(0.0f))
+            val uploadingURLBody = generateUploadURLRequestBody(bytesToSend.size)
+            val output = sdkApiService.postUploadURL(uploadingURLBody)
+                ?: throw IllegalStateException("output is null")
 
-        val jsonUrlsArray = output.getJSONArray("urls")
-        val uploadUrls = List<String>(jsonUrlsArray.length()) { jsonUrlsArray.getString(it) }
-        uploadJSONToUrls(
-            uploadUrls,
-            output.getString("upload_id"),
-            output.getString("id"),
-            bytesToSend
-        )
+            val jsonUrlsArray = output.getJSONArray("urls")
+            val uploadUrls = List<String>(jsonUrlsArray.length()) { jsonUrlsArray.getString(it) }
+            uploadJSONToUrls(
+                uploadUrls,
+                output.getString("upload_id"),
+                output.getString("id"),
+                bytesToSend
+            )
+        } catch (e: IOException) {
+            Timber.e(e, "startUploadingProcess: failed to upload")
+            _uploadProgressLiveData.postValue(UploadingState.Failed)
+        }
     }
 
     private fun gzipString2ByteArray(json: String): ByteArray {
@@ -77,14 +85,15 @@ class ScreeningViewModel(
             val nextPart = jsonByteArray.copyOfRange(pos, min(jsonSize, pos + MAX_UPLOAD_SIZE))
             Timber.i("about to upload chunk #$i; pos=$pos; chunk size=${nextPart.size}")
             val eTag = sdkApiService.putSendFileChunkFile(uploadURLs[i], nextPart) {
-                val progress = ((pos + it * nextPart.size) / jsonSize.toFloat()).coerceAtMost(1.0f)
-                _uploadProgressLiveData.postValue(UploadingProgress(progress, false))
+                val progress =
+                    ((pos + it * nextPart.size) / jsonSize.toFloat()).coerceAtMost(1.0f)
+                _uploadProgressLiveData.postValue(UploadingState.Uploading(progress))
             }
             eTagList.add(ETag(eTag, i + 1))
             Timber.i("chunk #$i successfully uploaded")
             pos += nextPart.size
         }
-        _uploadProgressLiveData.postValue(UploadingProgress(1.0f, true))
+        _uploadProgressLiveData.postValue(UploadingState.Processing)
         postCompleteResponse(vidID, uploadID, eTagList)
     }
 
@@ -189,10 +198,5 @@ class ScreeningViewModel(
     data class RetrievedData(
         val rrAverage: Double,
         val hrAverage: Double,
-    )
-
-    data class UploadingProgress(
-        val uploading: Float,
-        val processing: Boolean,
     )
 }

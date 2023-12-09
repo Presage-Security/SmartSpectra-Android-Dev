@@ -3,6 +3,7 @@
     <string name="stop">Stop</string>
     <string name="uploading_captured_data">Uploading the captured data to analyze them…</string>
     <string name="processing_captured_data">Analyzing…</string>
+    <string name="uploading_failed_hint">Uploading failed, check your internet connection and retry</string>
     <string name="shared_pref">Smart Spectra</string>
     <string name="checkup">CHECKUP</string>
     <string name="checkup_description">This is checkup button</string>
@@ -27,4 +28,5 @@
     <string name="camera_permission_hint">Heart rate and respiratory rate measurements require camera permission.</string>
     <string name="allow">Allow</string>
     <string name="open_settings">Open settings</string>
+    <string name="retry">Retry</string>
 </resources>
