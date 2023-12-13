@@ -83,6 +83,15 @@ signing {
 }
 
 publishing {
+    repositories {
+	maven {
+	    credentials {
+		username = "$usr"
+		password = "$pwd"
+	    }
+	    url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+       }
+    }
     publications {
         create<MavenPublication>("release") {
             afterEvaluate {
