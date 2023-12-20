@@ -1,4 +1,4 @@
-package com.presagetech.smartspectra.core.result
+package com.presagetech.smartspectra
 
 sealed class ScreeningResult {
     data class Success(

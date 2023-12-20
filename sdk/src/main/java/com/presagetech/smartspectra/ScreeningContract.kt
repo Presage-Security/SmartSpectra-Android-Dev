@@ -1,10 +1,9 @@
-package com.presagetech.smartspectra.core
+package com.presagetech.smartspectra
 
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
-import com.presagetech.smartspectra.core.result.ScreeningResult
 import com.presagetech.smartspectra.ui.SmartSpectraActivity
 
 class ScreeningContractInput(

@@ -1,4 +1,4 @@
-package com.presagetech.smartspectra.core.result
+package com.presagetech.smartspectra
 
 fun interface SmartSpectraResultListener {
     fun onResult(result: ScreeningResult)

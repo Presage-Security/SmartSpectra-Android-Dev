@@ -3,8 +3,8 @@ package com.presagetech.internal_demo
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.EditText
-import com.presagetech.smartspectra.core.button.SmartSpectraButton
-import com.presagetech.smartspectra.core.result.SmartSpectraResultView
+import com.presagetech.smartspectra.SmartSpectraButton
+import com.presagetech.smartspectra.SmartSpectraResultView
 
 class MainActivity : AppCompatActivity() {
     private lateinit var tokenEditText: EditText
@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity() {
             smartSpectraButton.setApiKey(token)
             true
         }
-
+        
         val storedToken = loadToken()
         smartSpectraButton.setApiKey(storedToken)
         tokenEditText.setText(storedToken)

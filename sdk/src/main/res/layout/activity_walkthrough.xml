@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".ui.WalkThroughActivity">
 
-    <com.presagetech.smartspectra.common.WalkThroughLayout
+    <com.presagetech.smartspectra.ui.WalkThroughLayout
         android:id="@+id/walk_through"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>

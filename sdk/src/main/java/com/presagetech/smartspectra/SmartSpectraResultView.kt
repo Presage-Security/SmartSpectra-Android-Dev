@@ -1,4 +1,4 @@
-package com.presagetech.smartspectra.core.result
+package com.presagetech.smartspectra
 
 import android.content.Context
 import android.util.AttributeSet
@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import com.presagetech.smartspectra.R
 import kotlin.math.roundToInt
 
 class SmartSpectraResultView(

@@ -1,4 +1,4 @@
-package com.presagetech.smartspectra.common
+package com.presagetech.smartspectra.ui
 
 import android.content.Context
 import android.graphics.*

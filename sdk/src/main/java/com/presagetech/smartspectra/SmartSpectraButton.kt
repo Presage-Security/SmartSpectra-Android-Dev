@@ -1,4 +1,4 @@
-package com.presagetech.smartspectra.core.button
+package com.presagetech.smartspectra
 
 import android.content.Context
 import android.content.Intent
@@ -16,10 +16,6 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import androidx.core.view.doOnLayout
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.presagetech.smartspectra.R
-import com.presagetech.smartspectra.core.ScreeningContract
-import com.presagetech.smartspectra.core.ScreeningContractInput
-import com.presagetech.smartspectra.core.result.SmartSpectraResultListener
 import com.presagetech.smartspectra.ui.WalkActivityParams
 import com.presagetech.smartspectra.ui.WalkThroughActivity
 import com.presagetech.smartspectra.utils.PreferencesUtils

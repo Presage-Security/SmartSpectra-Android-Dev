@@ -12,7 +12,6 @@ import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatTextView
 import com.presagetech.smartspectra.R
-import com.presagetech.smartspectra.common.WalkThroughLayout
 import com.presagetech.smartspectra.utils.PreferencesUtils
 import org.json.JSONArray
 
