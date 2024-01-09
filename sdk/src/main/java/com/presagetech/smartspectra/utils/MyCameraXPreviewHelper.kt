@@ -112,12 +112,13 @@ class MyCameraXPreviewHelper {
     }
 
     fun toggleCameraControl(locked: Boolean) {
+        val cameraControl = camera?.cameraControl ?: return
         val options = CaptureRequestOptions.Builder()
             .setCaptureRequestOption(CaptureRequest.CONTROL_AWB_LOCK, locked)
             .setCaptureRequestOption(CaptureRequest.CONTROL_AE_LOCK, locked)
             .setCaptureRequestOption(CaptureRequest.BLACK_LEVEL_LOCK, locked)
             .build()
-        Camera2CameraControl.from(camera?.cameraControl!!).captureRequestOptions = options
+        Camera2CameraControl.from(cameraControl).captureRequestOptions = options
     }
 
     private fun createSurfaceTexture(): SurfaceTexture {
