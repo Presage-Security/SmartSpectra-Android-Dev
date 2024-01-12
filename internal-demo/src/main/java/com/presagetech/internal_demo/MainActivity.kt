@@ -1,10 +1,13 @@
 package com.presagetech.internal_demo
 
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.EditText
+import android.widget.Toast
 import com.presagetech.smartspectra.SmartSpectraButton
 import com.presagetech.smartspectra.SmartSpectraResultView
+import timber.log.Timber
 
 class MainActivity : AppCompatActivity() {
     private lateinit var tokenEditText: EditText
@@ -29,6 +32,23 @@ class MainActivity : AppCompatActivity() {
         val storedToken = loadToken()
         smartSpectraButton.setApiKey(storedToken)
         tokenEditText.setText(storedToken)
+
+        if (!isSupportedAbi()) {
+            smartSpectraButton.isEnabled = false
+            tokenEditText.isEnabled = false
+            Toast.makeText(this, "Unsupported device (ABI)", Toast.LENGTH_LONG).show()
+            Timber.d("Unsupported device (ABI)")
+            Timber.d("This device ABIs: ${Build.SUPPORTED_ABIS.contentToString()}")
+        }
+    }
+
+    private fun isSupportedAbi(): Boolean {
+        Build.SUPPORTED_ABIS.forEach {
+            if (it == "arm64-v8a" || it == "armeabi-v7a") {
+                return true
+            }
+        }
+        return false
     }
 
     private fun loadToken(): String {
