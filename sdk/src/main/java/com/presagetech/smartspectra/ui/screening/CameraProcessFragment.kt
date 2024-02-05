@@ -39,7 +39,7 @@ import java.util.*
 
 @ExperimentalCamera2Interop
 class CameraProcessFragment : Fragment() {
-    private val BINARY_GRAPH_NAME = "client_gpu.binarypb"
+    private val BINARY_GRAPH_NAME = "preprocessing_gpu.binarypb"
     private val INPUT_VIDEO_STREAM_NAME = "input_video"
     private val SELECTED_INPUT_STREAM_NAME = "start_button_pre"
 
