@@ -36,9 +36,9 @@ class MainActivity : AppCompatActivity() {
         if (!isSupportedAbi()) {
             smartSpectraButton.isEnabled = false
             tokenEditText.isEnabled = false
-            Toast.makeText(this, "Unsupported device (ABI)", Toast.LENGTH_LONG).show()
-            Timber.d("Unsupported device (ABI)")
-            Timber.d("This device ABIs: ${Build.SUPPORTED_ABIS.contentToString()}")
+            val abi = Build.SUPPORTED_ABIS.contentToString()
+            Toast.makeText(this, "Unsupported device (ABI) $abi", Toast.LENGTH_LONG).show()
+            Timber.d("Unsupported device (ABI) $abi")
         }
     }
 

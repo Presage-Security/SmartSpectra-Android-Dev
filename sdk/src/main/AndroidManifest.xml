@@ -15,5 +15,12 @@
             android:exported="false"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Material3.Light.NoActionBar" />
+
+        <provider
+            android:name=".crashes.InitializationContentProvider"
+            android:authorities="${applicationId}.com.presagetech.smartspectra.crashes_initialization_provider"
+            android:exported="false"
+            android:enabled="true">
+        </provider>
     </application>
 </manifest>

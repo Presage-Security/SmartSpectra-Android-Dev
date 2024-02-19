@@ -2,12 +2,8 @@ package com.presagetech.smartspectra.network
 
 import org.json.JSONObject
 
-/**
- * Implementation for [SDKApiService] class
- * */
-class SDKApiService(private val token: String) {
-    private val BASE_URL = "https://api.physiology.presagetech.com/"
 
+class SDKApiService(private val token: String) {
     suspend fun postUploadURL(body: JSONObject): JSONObject? {
         return HttpMethods.post(
             url = getUrl("v1/upload-url"),
@@ -47,7 +43,11 @@ class SDKApiService(private val token: String) {
             ?: throw IllegalStateException("missing etag in response headers")
     }
 
-    private fun getUrl(url: String): String = "$BASE_URL$url"
-
     private fun getDefaultHeaders(): Map<String, String> = mapOf("x-api-key" to token)
+
+    companion object {
+        const val BASE_URL = "https://api.physiology.presagetech.com/"
+
+        fun getUrl(url: String): String = "$BASE_URL$url"
+    }
 }
