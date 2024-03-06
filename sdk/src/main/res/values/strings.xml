@@ -19,9 +19,9 @@
     <string name="rr_hr_hint">.....</string>
     <string name="loading_hint">Preparing…</string>
     <string name="no_face_found">No face found</string>
-    <string name="too_many_face">Too many faces in view</string>
+    <string name="too_many_face">Only one face is permitted</string>
     <string name="face_is_not_centered">Center face in view</string>
-    <string name="face_distance">Face not right distance from the camera</string>
+    <string name="face_distance">Move closer to camera</string>
     <string name="image_too_dark">Increase light on face</string>
     <string name="image_too_bright">Decrease light on face</string>
     <string name="not_enough_chest">Place more of chest in view</string>
