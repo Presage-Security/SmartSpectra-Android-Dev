@@ -11,6 +11,7 @@ object ErrorMessages {
         3 to R.string.face_is_not_centered,
         4 to R.string.face_is_not_centered,
         5 to R.string.image_too_dark,
-        6 to R.string.not_enough_chest,
+        6 to R.string.image_too_bright,
+        7 to R.string.not_enough_chest,
     )
 }
