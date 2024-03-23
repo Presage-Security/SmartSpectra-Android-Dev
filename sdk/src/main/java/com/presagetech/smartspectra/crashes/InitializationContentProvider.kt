@@ -27,7 +27,6 @@ class InitializationContentProvider : ContentProvider() {
             interceptor.uncaughtException(thread, exception)
             originalHandler?.uncaughtException(thread, exception)
         }
-        CrashesUploader.tryUploadCrashReports(context)
     }
 
     // Implement the remaining abstract methods with no-op implementations

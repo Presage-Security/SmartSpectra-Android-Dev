@@ -16,6 +16,7 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import androidx.core.view.doOnLayout
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.presagetech.smartspectra.crashes.CrashesUploader
 import com.presagetech.smartspectra.ui.WalkActivityParams
 import com.presagetech.smartspectra.ui.WalkThroughActivity
 import com.presagetech.smartspectra.utils.PreferencesUtils
@@ -106,6 +107,7 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
                     "Please refer to the documentation for more details."
         )
         screeningActivityLauncher.launch(ScreeningContractInput(key))
+        CrashesUploader.tryUploadCrashReports(context, key)
     }
 
     private fun openWalkThrough(context: Context) {

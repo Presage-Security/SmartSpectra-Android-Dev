@@ -2,6 +2,7 @@ package com.presagetech.smartspectra.crashes
 
 import android.content.Context
 import android.os.Build
+import android.util.Base64
 import java.io.File
 
 class MiddlewareExceptionHandler(
@@ -48,14 +49,14 @@ class MiddlewareExceptionHandler(
         val timestamp = System.currentTimeMillis() / 1_000 // convert to seconds
         val device = getDeviceInfo()
         val stackTrace = e.stackTraceToString()
+        val base64 = Base64.encodeToString(stackTrace.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
         return """
 Timestamp: $timestamp
 Device: $device
 AppPackage: ${context.packageName}
 LibraryPackage: ${getOurPackage()}
-
-$stackTrace
-""".trimStart()  // remove leading newline
+StackTrace: $base64
+""".trim('\n')  // remove leading newline
     }
 
     private fun getDeviceInfo(): String {

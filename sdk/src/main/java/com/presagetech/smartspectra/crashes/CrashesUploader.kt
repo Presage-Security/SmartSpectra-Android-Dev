@@ -11,19 +11,19 @@ import java.lang.Thread.sleep
 object CrashesUploader {
     private var initialized = false
 
-    fun tryUploadCrashReports(context: Context) {
+    fun tryUploadCrashReports(context: Context, apiKey: String) {
         // only upload once
         if (initialized) return
         initialized = true
         try {
             val folder = MiddlewareExceptionHandler.getCrashReportsFolder(context)
-            uploadCrashReports(folder)
+            uploadCrashReports(folder, apiKey)
         } catch (e: Throwable) {
             Timber.e(e, "Failed to upload crash reports")
         }
     }
 
-    private fun uploadCrashReports(folder: File) {
+    private fun uploadCrashReports(folder: File, apiKey: String) {
         if (!folder.exists()) return
         val reports = folder.listFiles() ?: return
         if (reports.isEmpty()) return
@@ -35,7 +35,7 @@ object CrashesUploader {
                     reports.forEach { report ->
                         val content = report.readText()
                         Timber.i("Uploading crash report: ${report.name}")
-                        val success = postCrashReport(content)
+                        val success = postCrashReport(content, apiKey)
                         if (success) {
                             Timber.i("${report.name} uploaded")
                             report.delete()
@@ -51,10 +51,11 @@ object CrashesUploader {
         }, "Smartspectra CrashesUploader").start()
     }
 
-    private suspend fun postCrashReport(body: String): Boolean {
+    private suspend fun postCrashReport(body: String, apiKey: String): Boolean {
         return HttpMethods.post(
             url = getUrl("v1/android-crash-report"),
             body = body,
+            headers = mapOf("x-api-key" to apiKey)
         ).responseCode in 200..299
     }
 }

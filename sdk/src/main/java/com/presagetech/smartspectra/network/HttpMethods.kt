@@ -50,6 +50,9 @@ object HttpMethods {
             BufferedOutputStream(connection.outputStream).use {
                 it.write(body.toByteArray())
             }
+            if (connection.responseCode !in  (200..299)) {
+                throw IOException("HTTP ${connection.responseCode}: ${connection.responseMessage}")
+            }
             val responseBody =
                 BufferedReader(InputStreamReader(connection.inputStream)).buffered().use {
                         it.readText()
