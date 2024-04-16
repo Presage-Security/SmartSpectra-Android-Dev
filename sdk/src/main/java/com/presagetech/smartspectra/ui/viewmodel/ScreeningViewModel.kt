@@ -147,7 +147,7 @@ class ScreeningViewModel(
                 Timber.i("retrieveData #$attempt: failed to parse response")
                 null
             }
-            if (json != null && json.has("rr")) {
+            if (json != null && json.has("pressure")) {
                 return parseRetrieveDataResponse(json)
             } else {
                 delay(retryDelay)
@@ -165,7 +165,7 @@ class ScreeningViewModel(
         }
 
     private fun parseRetrieveDataResponse(response: JSONObject): RetrievedData {
-        val rrObject = response.getJSONObject("rr")
+        val rrObject = response.getJSONObject("breath").getJSONObject("rr")
         val rrIterator = rrObject.keys()
         var rrSum = 0.0
         var rrCount = 0
@@ -177,8 +177,7 @@ class ScreeningViewModel(
         }
         val rrAverage = if (rrCount > 0) rrSum / rrCount else 0.0
 
-
-        val hrObject = response.getJSONObject("hr")
+        val hrObject = response.getJSONObject("pulse").getJSONObject("hr")
         val hrIterator = hrObject.keys()
         var hrSum = 0.0
         var hrCount = 0
@@ -190,7 +189,8 @@ class ScreeningViewModel(
             hrCount++
         }
         val hrAverage = if (hrCount > 0) hrSum / hrCount else 0.0
-        val result = RetrievedData(rrAverage, hrAverage)
+
+        val result = RetrievedData(rrAverage, hrAverage, response) // Pass the response here
         Timber.d("parseRetrieveDataResponse: $result")
         return result
     }
@@ -198,5 +198,6 @@ class ScreeningViewModel(
     data class RetrievedData(
         val rrAverage: Double,
         val hrAverage: Double,
+        val response: JSONObject  // Add this line to include the JSONObject
     )
 }
