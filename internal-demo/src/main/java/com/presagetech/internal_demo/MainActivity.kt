@@ -9,7 +9,7 @@ import com.presagetech.smartspectra.SmartSpectraButton
 import com.presagetech.smartspectra.SmartSpectraResultView
 import timber.log.Timber
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), SmartSpectraResultView.SmartSpectraResultsCallback {
     private lateinit var tokenEditText: EditText
     private lateinit var smartSpectraButton: SmartSpectraButton
 
@@ -19,6 +19,7 @@ class MainActivity : AppCompatActivity() {
 
         smartSpectraButton = findViewById(R.id.btn)
         val resultView = findViewById<SmartSpectraResultView>(R.id.result_view)
+        resultView.callback = this
         smartSpectraButton.setResultListener(resultView)
 
         tokenEditText = findViewById(R.id.text_api_token)
@@ -40,6 +41,11 @@ class MainActivity : AppCompatActivity() {
             Timber.d("Unsupported device (ABI)")
             Timber.d("This device ABIs: ${Build.SUPPORTED_ABIS.contentToString()}")
         }
+    }
+    override fun onJsonDataReceived(jsonData: String) {
+        // Here you can handle the received JSON data as needed
+        Timber.d("Received JSON data: $jsonData")
+        // You might want to save it or process it further here
     }
 
     private fun isSupportedAbi(): Boolean {

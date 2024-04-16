@@ -13,6 +13,7 @@ class SmartSpectraResultView(
     attrs: AttributeSet?
 ) : LinearLayout(context, attrs), SmartSpectraResultListener {
     private var descriptionTextView: TextView
+    var callback: SmartSpectraResultsCallback? = null
 
     init {
         orientation = VERTICAL
@@ -33,10 +34,17 @@ class SmartSpectraResultView(
     private fun success(result: ScreeningResult.Success) {
         val rr = result.rrAverage.roundToInt()
         val hr = result.hrAverage.roundToInt()
+        val json_data = result.jsonMetrics
         descriptionTextView.text = context.getString(R.string.rr_hr_values, rr, hr)
+        callback?.onJsonDataReceived(json_data)
     }
 
     private fun failed() {
         descriptionTextView.setText(R.string.rr_hr_empty)
     }
+    interface SmartSpectraResultsCallback {
+        fun onJsonDataReceived(jsonData: String)
+    }
+
 }
+
