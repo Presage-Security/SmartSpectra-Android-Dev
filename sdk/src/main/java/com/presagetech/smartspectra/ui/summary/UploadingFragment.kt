@@ -59,6 +59,7 @@ class UploadingFragment : Fragment() {
             requireActivity().setResult(Activity.RESULT_OK, Intent().apply {
                 putExtra(SmartSpectraActivity.RESULT_HR_KEY, it.hrAverage)
                 putExtra(SmartSpectraActivity.RESULT_RR_KEY, it.rrAverage)
+                putExtra(SmartSpectraActivity.JSON_METRICS, it.jsonMetrics.toString())
             })
             requireActivity().finish()
         }

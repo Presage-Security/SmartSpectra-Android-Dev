@@ -70,5 +70,6 @@ class SmartSpectraActivity : AppCompatActivity() {
         const val EXTRA_API_KEY = "apiKey"
         const val RESULT_HR_KEY = "hr"
         const val RESULT_RR_KEY = "rr"
+        const val JSON_METRICS = "jsonMetrics"
     }
 }

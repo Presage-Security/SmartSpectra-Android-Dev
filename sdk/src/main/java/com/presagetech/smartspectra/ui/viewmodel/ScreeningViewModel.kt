@@ -198,6 +198,6 @@ class ScreeningViewModel(
     data class RetrievedData(
         val rrAverage: Double,
         val hrAverage: Double,
-        val vitalJson: JSONObject  // Add this line to include the JSONObject
+        val jsonMetrics: JSONObject  // Add this line to include the JSONObject
     )
 }

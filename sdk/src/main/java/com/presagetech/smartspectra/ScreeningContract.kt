@@ -22,9 +22,15 @@ class ScreeningContract : ActivityResultContract<ScreeningContractInput, Screeni
             requireNotNull(intent)
             require(intent.hasExtra(SmartSpectraActivity.RESULT_HR_KEY))
             require(intent.hasExtra(SmartSpectraActivity.RESULT_RR_KEY))
+            require(intent.hasExtra(SmartSpectraActivity.JSON_METRICS))
+            val hr = intent.getDoubleExtra(SmartSpectraActivity.RESULT_HR_KEY, 0.0)
+            val rr = intent.getDoubleExtra(SmartSpectraActivity.RESULT_RR_KEY, 0.0)
+            val jsonMetrics = intent.getStringExtra(SmartSpectraActivity.JSON_METRICS) ?: "none"
+
             ScreeningResult.Success(
-                intent.getDoubleExtra(SmartSpectraActivity.RESULT_HR_KEY, 0.0),
-                intent.getDoubleExtra(SmartSpectraActivity.RESULT_RR_KEY, 0.0)
+                hr,
+                rr,
+                jsonMetrics
             )
         } else {
             ScreeningResult.Failed
