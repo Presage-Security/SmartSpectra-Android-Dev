@@ -44,19 +44,16 @@ class MainActivity : AppCompatActivity(), SmartSpectraResultView.SmartSpectraRes
         }
     }
     override fun onMetricsJsonReceive(jsonMetrics: JSONObject) {
-        // Here you can handle the received JSON data as needed
+        // Here you can handle the received Metrics JSON
         Timber.d("Received JSON data: $jsonMetrics")
-        // You might want to save it or process it further here
     }
     override fun onStrictPuleRateReceived(strictPulseRate: Int) {
-        // Here you can handle the received JSON data as needed
+        // Here you can handle the received strict Pulse Rate in beats per minute
         Timber.d("Received JSON data: $strictPulseRate")
-        // You might want to save it or process it further here
     }
     override fun onStrictBreathingRateReceived(strictBreathingRate: Int) {
-        // Here you can handle the received JSON data as needed
+        // Here you can handle the received strict Breathing Rate in beats per minute
         Timber.d("Received JSON data: $strictBreathingRate")
-        // You might want to save it or process it further here
     }
 
     private fun isSupportedAbi(): Boolean {
