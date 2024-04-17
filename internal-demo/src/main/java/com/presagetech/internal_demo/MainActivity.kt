@@ -30,12 +30,15 @@ class MainActivity : AppCompatActivity(), SmartSpectraResultView.SmartSpectraRes
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // Setting up SmartSpectra Results/Views
         smartSpectraButton = findViewById(R.id.btn)
         val resultView = findViewById<SmartSpectraResultView>(R.id.result_view)
         resultView.callback = this
         smartSpectraButton.setResultListener(resultView)
         chart = findViewById(R.id.chart)
 
+
+        // API Key Entry
         tokenEditText = findViewById(R.id.text_api_token)
         tokenEditText.setOnEditorActionListener { _, _, _ ->
             val token = tokenEditText.text.toString().trim()
@@ -43,11 +46,11 @@ class MainActivity : AppCompatActivity(), SmartSpectraResultView.SmartSpectraRes
             smartSpectraButton.setApiKey(token)
             true
         }
-        
         val storedToken = loadToken()
         smartSpectraButton.setApiKey(storedToken)
         tokenEditText.setText(storedToken)
 
+        // In case of unsupported devices
         if (!isSupportedAbi()) {
             smartSpectraButton.isEnabled = false
             tokenEditText.isEnabled = false
