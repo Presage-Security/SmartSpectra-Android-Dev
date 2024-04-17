@@ -7,6 +7,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import kotlin.math.roundToInt
+import org.json.JSONObject
 
 class SmartSpectraResultView(
     context: Context,
@@ -32,18 +33,24 @@ class SmartSpectraResultView(
     }
 
     private fun success(result: ScreeningResult.Success) {
-        val rr = result.rrAverage.roundToInt()
-        val hr = result.hrAverage.roundToInt()
-        val json_data = result.jsonMetrics
-        descriptionTextView.text = context.getString(R.string.rr_hr_values, rr, hr)
-        callback?.onJsonDataReceived(json_data)
+        val strictBreathingRate = result.rrAverage.roundToInt()
+        val strictPulseRate = result.hrAverage.roundToInt()
+        val stringMetrics = result.jsonMetrics
+        descriptionTextView.text = context.getString(R.string.rr_hr_values,
+            strictBreathingRate, strictPulseRate)
+        val jsonMetrics = JSONObject(stringMetrics)
+        callback?.onMetricsJsonReceive(jsonMetrics)
+        callback?.onStrictPuleRateReceived(strictPulseRate)
+        callback?.onStrictBreathingRateReceived(strictBreathingRate)
     }
 
     private fun failed() {
         descriptionTextView.setText(R.string.rr_hr_empty)
     }
     interface SmartSpectraResultsCallback {
-        fun onJsonDataReceived(jsonData: String)
+        fun onMetricsJsonReceive(jsonMetrics: JSONObject)
+        fun onStrictPuleRateReceived(strictPulseRate: Int)
+        fun onStrictBreathingRateReceived(strictBreathingRate: Int)
     }
 
 }

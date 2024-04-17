@@ -7,6 +7,7 @@ import android.widget.EditText
 import android.widget.Toast
 import com.presagetech.smartspectra.SmartSpectraButton
 import com.presagetech.smartspectra.SmartSpectraResultView
+import org.json.JSONObject
 import timber.log.Timber
 
 class MainActivity : AppCompatActivity(), SmartSpectraResultView.SmartSpectraResultsCallback {
@@ -42,9 +43,19 @@ class MainActivity : AppCompatActivity(), SmartSpectraResultView.SmartSpectraRes
             Timber.d("This device ABIs: ${Build.SUPPORTED_ABIS.contentToString()}")
         }
     }
-    override fun onJsonDataReceived(jsonData: String) {
+    override fun onMetricsJsonReceive(jsonMetrics: JSONObject) {
         // Here you can handle the received JSON data as needed
-        Timber.d("Received JSON data: $jsonData")
+        Timber.d("Received JSON data: $jsonMetrics")
+        // You might want to save it or process it further here
+    }
+    override fun onStrictPuleRateReceived(strictPulseRate: Int) {
+        // Here you can handle the received JSON data as needed
+        Timber.d("Received JSON data: $strictPulseRate")
+        // You might want to save it or process it further here
+    }
+    override fun onStrictBreathingRateReceived(strictBreathingRate: Int) {
+        // Here you can handle the received JSON data as needed
+        Timber.d("Received JSON data: $strictBreathingRate")
         // You might want to save it or process it further here
     }
 
