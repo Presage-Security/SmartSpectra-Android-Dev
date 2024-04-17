@@ -1,23 +1,22 @@
 package com.presagetech.internal_demo
 
+// Plotting imports
+
+// SmartSpectra SDK Specific Imports
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import org.json.JSONObject
-import timber.log.Timber
-
-// Plotting imports
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
-
-// SmartSpectra SDK Specific Imports
 import com.presagetech.smartspectra.SmartSpectraButton
 import com.presagetech.smartspectra.SmartSpectraResultView
+import org.json.JSONObject
+import timber.log.Timber
 
 
 class MainActivity : AppCompatActivity(), SmartSpectraResultView.SmartSpectraResultsCallback {
@@ -74,7 +73,7 @@ class MainActivity : AppCompatActivity(), SmartSpectraResultView.SmartSpectraRes
 
     /**
      * Recieves the strict pulse rate from the measurement.
-     * Strict pulse rates are the average of only high signal to noise pulse rate values.
+     * Strict pulse rates are the average of only high confidence pulse rate values.
      * @param strictPulseRate The strict pulse rate received, measured in beats per minute.
      */
     override fun onStrictPuleRateReceived(strictPulseRate: Int) {
