@@ -1,18 +1,20 @@
 package com.presagetech.internal_demo
 
-// Plotting imports
 
-// SmartSpectra SDK Specific Imports
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+
+// Plotting imports
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+
+// SmartSpectra SDK Specific Imports
 import com.presagetech.smartspectra.SmartSpectraButton
 import com.presagetech.smartspectra.SmartSpectraResultView
 import org.json.JSONObject
