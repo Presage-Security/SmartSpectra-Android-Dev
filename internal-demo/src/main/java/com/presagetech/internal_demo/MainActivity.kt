@@ -1,10 +1,15 @@
 package com.presagetech.internal_demo
 
+import android.graphics.Color
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.EditText
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
 import com.presagetech.smartspectra.SmartSpectraButton
 import com.presagetech.smartspectra.SmartSpectraResultView
 import org.json.JSONObject
@@ -13,6 +18,7 @@ import timber.log.Timber
 class MainActivity : AppCompatActivity(), SmartSpectraResultView.SmartSpectraResultsCallback {
     private lateinit var tokenEditText: EditText
     private lateinit var smartSpectraButton: SmartSpectraButton
+    private lateinit var chart: LineChart
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,6 +28,7 @@ class MainActivity : AppCompatActivity(), SmartSpectraResultView.SmartSpectraRes
         val resultView = findViewById<SmartSpectraResultView>(R.id.result_view)
         resultView.callback = this
         smartSpectraButton.setResultListener(resultView)
+        chart = findViewById(R.id.chart)
 
         tokenEditText = findViewById(R.id.text_api_token)
         tokenEditText.setOnEditorActionListener { _, _, _ ->
@@ -45,6 +52,7 @@ class MainActivity : AppCompatActivity(), SmartSpectraResultView.SmartSpectraRes
     }
     override fun onMetricsJsonReceive(jsonMetrics: JSONObject) {
         // Here you can handle the received Metrics JSON
+        plethPlotting(jsonMetrics)
         Timber.d("Received JSON data: $jsonMetrics")
     }
     override fun onStrictPuleRateReceived(strictPulseRate: Int) {
@@ -55,6 +63,52 @@ class MainActivity : AppCompatActivity(), SmartSpectraResultView.SmartSpectraRes
         // Here you can handle the received strict Breathing Rate in beats per minute
         Timber.d("Received JSON data: $strictBreathingRate")
     }
+
+    private fun plethPlotting(jsonMetrics: JSONObject) {
+        val plethJson = jsonMetrics.getJSONObject("pulse").getJSONObject("hr_trace")
+        val entries = mutableListOf<Entry>()
+
+        val iterator = plethJson.keys()
+        while (iterator.hasNext()) {
+            val time = iterator.next() // This is the string key
+            val value = plethJson.getJSONObject(time).getDouble("value")
+            entries.add(Entry(time.toFloat(), value.toFloat()))
+        }
+
+        // Sort the entries based on the X value (time)
+        entries.sortBy { it.x }
+
+
+        val dataSet = LineDataSet(entries, "Pleth")
+
+        // Clean up line
+        dataSet.setDrawValues(false)
+        dataSet.setDrawCircles(false)
+        dataSet.color = Color.RED
+
+
+        val lineData = LineData(dataSet)
+        // clean up chart
+        val xAxis = chart.xAxis
+        xAxis.setDrawGridLines(false)
+        xAxis.setDrawAxisLine(false)
+        xAxis.setDrawLabels(false)
+        val leftAxis = chart.axisLeft
+        leftAxis.setDrawGridLines(false)
+        leftAxis.setDrawAxisLine(false)
+        leftAxis.setDrawLabels(false)
+        val rightAxis = chart.axisRight
+        rightAxis.setDrawGridLines(false)
+        rightAxis.setDrawAxisLine(false)
+        rightAxis.setDrawLabels(false)
+        chart.legend.isEnabled = false
+        chart.description.isEnabled = false
+
+        chart.data = lineData
+        chart.invalidate() // refresh the chart
+    }
+
+
 
     private fun isSupportedAbi(): Boolean {
         Build.SUPPORTED_ABIS.forEach {
