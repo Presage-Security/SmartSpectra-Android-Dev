@@ -3,6 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("maven-publish")
     id("signing")
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
 android {
@@ -89,13 +90,14 @@ signing {
 
 publishing {
     repositories {
-	maven {
-	    credentials {
-		username = "$usr"
-		password = "$pwd"
-	    }
-	    url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
-       }
+        maven {
+            credentials {
+                // local.properties or environment variables
+                username = project.findProperty("MAVEN_USER") as String? ?: System.getenv("MAVEN_USER")
+                password = project.findProperty("MAVEN_PASSWORD") as String? ?: System.getenv("MAVEN_PASSWORD")
+            }
+            url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+        }
     }
     publications {
         create<MavenPublication>("release") {

@@ -49,14 +49,15 @@ class MiddlewareExceptionHandler(
         val timestamp = System.currentTimeMillis() / 1_000 // convert to seconds
         val device = getDeviceInfo()
         val stackTrace = e.stackTraceToString()
-        val base64 = Base64.encodeToString(stackTrace.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
-        return """
+        val str = """
 Timestamp: $timestamp
 Device: $device
 AppPackage: ${context.packageName}
 LibraryPackage: ${getOurPackage()}
-StackTrace: $base64
-""".trim('\n')  // remove leading newline
+
+$stackTrace
+""".trimStart('\n')  // remove leading newline
+        return Base64.encodeToString(str.toByteArray(), Base64.NO_WRAP)
     }
 
     private fun getDeviceInfo(): String {
