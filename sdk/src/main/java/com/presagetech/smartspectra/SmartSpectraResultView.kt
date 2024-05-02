@@ -14,7 +14,6 @@ class SmartSpectraResultView(
     attrs: AttributeSet?
 ) : LinearLayout(context, attrs), SmartSpectraResultListener {
     private var descriptionTextView: TextView
-    var callback: SmartSpectraResultsCallback? = null
 
     init {
         orientation = VERTICAL
@@ -35,23 +34,12 @@ class SmartSpectraResultView(
     private fun success(result: ScreeningResult.Success) {
         val strictBreathingRate = result.rrAverage.roundToInt()
         val strictPulseRate = result.hrAverage.roundToInt()
-        val stringMetrics = result.jsonMetrics
         descriptionTextView.text = context.getString(R.string.rr_hr_values,
             strictBreathingRate, strictPulseRate)
-        val jsonMetrics = JSONObject(stringMetrics)
-        callback?.onMetricsJsonReceive(jsonMetrics)
-        callback?.onStrictPuleRateReceived(strictPulseRate)
-        callback?.onStrictBreathingRateReceived(strictBreathingRate)
     }
 
     private fun failed() {
         descriptionTextView.setText(R.string.rr_hr_empty)
     }
-    interface SmartSpectraResultsCallback {
-        fun onMetricsJsonReceive(jsonMetrics: JSONObject)
-        fun onStrictPuleRateReceived(strictPulseRate: Int)
-        fun onStrictBreathingRateReceived(strictBreathingRate: Int)
-    }
-
 }
 

@@ -4,6 +4,7 @@ package com.presagetech.internal_demo
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.view.View
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -16,14 +17,16 @@ import com.github.mikephil.charting.data.LineDataSet
 
 // SmartSpectra SDK Specific Imports
 import com.presagetech.smartspectra.SmartSpectraButton
+import com.presagetech.smartspectra.SmartSpectraResultListener
 import com.presagetech.smartspectra.SmartSpectraResultView
-import org.json.JSONObject
+import com.presagetech.smartspectra.ScreeningResult
 import timber.log.Timber
 
 
-class MainActivity : AppCompatActivity(), SmartSpectraResultView.SmartSpectraResultsCallback {
+class MainActivity : AppCompatActivity() {
     private lateinit var tokenEditText: EditText
     private lateinit var smartSpectraButton: SmartSpectraButton
+    private lateinit var resultView: SmartSpectraResultView
     private lateinit var chart: LineChart
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,11 +35,11 @@ class MainActivity : AppCompatActivity(), SmartSpectraResultView.SmartSpectraRes
 
         // Setting up SmartSpectra Results/Views
         smartSpectraButton = findViewById(R.id.btn)
-        val resultView = findViewById<SmartSpectraResultView>(R.id.result_view)
-        resultView.callback = this
-        smartSpectraButton.setResultListener(resultView)
+        resultView = findViewById(R.id.result_view)
         chart = findViewById(R.id.chart)
+        chart.visibility = View.INVISIBLE
 
+        smartSpectraButton.setResultListener(resultListener)
 
         // API Key Entry
         tokenEditText = findViewById(R.id.text_api_token)
@@ -60,63 +63,35 @@ class MainActivity : AppCompatActivity(), SmartSpectraResultView.SmartSpectraRes
         }
     }
 
-    /**
-     * Receives JSON metrics from the measurement (see readme for JSON structure).
-     * @param jsonMetrics The complete JSON object containing various metrics.
-     */
-    override fun onMetricsJsonReceive(jsonMetrics: JSONObject) {
-        // Here you can handle the received Metrics JSON
-        // Pulse Pleth Example
-        // Extract Data
-        val plethPulseJson = jsonMetrics.getJSONObject("pulse").getJSONObject("hr_trace")
-        // Parse and Sort the data
-        val plethEntries = parseAndSortEntries(plethPulseJson)
-        // Plot the Data
-        dataPlotting(plethEntries)
-        Timber.d("Received JSON data: $jsonMetrics")
-    }
-
-    /**
-     * Recieves the strict pulse rate from the measurement.
-     * Strict pulse rates are the average of only high confidence pulse rate values.
-     * @param strictPulseRate The strict pulse rate received, measured in beats per minute.
-     */
-    override fun onStrictPuleRateReceived(strictPulseRate: Int) {
-        // Here you can handle the received strict Pulse Rate in beats per minute
-        Timber.d("Received JSON data: $strictPulseRate")
-    }
-
-    /**
-     * Recieves the strict breathing rate from the measurement.
-     * Strict breathing rates are the average of only high confidence breathing rate values.
-     * @param strictBreathingRate The strict breathing rate received, measured in beats per minute.
-     */
-    override fun onStrictBreathingRateReceived(strictBreathingRate: Int) {
-        // Here you can handle the received strict Breathing Rate in beats per minute
-        Timber.d("Received JSON data: $strictBreathingRate")
-    }
-
-    /**
-     * Parses a JSON object containing time and values into a sorted list of entries.
-     * @param json The JSON object where each key is a timestamp and each value is a nested JSON object with a "value" key.
-     * @return A sorted list of entries for use in a chart.
-     */
-    fun parseAndSortEntries(json: JSONObject): List<Entry> {
-        val entries = mutableListOf<Entry>()
-
-        val iterator = json.keys()
-        while (iterator.hasNext()) {
-            val time = iterator.next() // This is the string key
-            val value = json.getJSONObject(time).getDouble("value")
-            entries.add(Entry(time.toFloat(), value.toFloat()))
+    private val resultListener: SmartSpectraResultListener = SmartSpectraResultListener { result ->
+        resultView.onResult(result) // pass the result to the view or handle it as needed
+        // example usage of HR trace data (if present) to plot a HR chart
+        if (result is ScreeningResult.Success && !result.hrTrace.isNullOrEmpty()) {
+            chart.visibility = View.VISIBLE
+            dataPlotting(result.hrTrace!!.map { Entry(it.time, it.value) })
         }
-
-        // Sort the entries based on the X value (time)
-        entries.sortBy { it.x }
-
-        return entries
     }
 
+    private fun isSupportedAbi(): Boolean {
+        Build.SUPPORTED_ABIS.forEach {
+            if (it == "arm64-v8a" || it == "armeabi-v7a") {
+                return true
+            }
+        }
+        return false
+    }
+
+    private fun loadToken(): String {
+        return getSharedPreferences(TOKEN_SHARED_PREFERENCES, MODE_PRIVATE)
+            .getString(TOKEN_SHARED_PREFERENCES, null) ?: ""
+    }
+
+    private fun saveToken(token: String) {
+        getSharedPreferences(TOKEN_SHARED_PREFERENCES, MODE_PRIVATE).edit().apply {
+            putString(TOKEN_SHARED_PREFERENCES, token)
+            apply()
+        }
+    }
 
     /**
      * Configures and displays a line chart with the provided data entries.
@@ -150,32 +125,10 @@ class MainActivity : AppCompatActivity(), SmartSpectraResultView.SmartSpectraRes
         rightAxis.setDrawLabels(false)
         chart.legend.isEnabled = false
         chart.description.isEnabled = false
+        chart.onTouchListener = null
 
         chart.data = lineData
-        chart.invalidate() // refresh the chart
-    }
-
-
-
-    private fun isSupportedAbi(): Boolean {
-        Build.SUPPORTED_ABIS.forEach {
-            if (it == "arm64-v8a" || it == "armeabi-v7a") {
-                return true
-            }
-        }
-        return false
-    }
-
-    private fun loadToken(): String {
-        return getSharedPreferences(TOKEN_SHARED_PREFERENCES, MODE_PRIVATE)
-            .getString(TOKEN_SHARED_PREFERENCES, null) ?: ""
-    }
-
-    private fun saveToken(token: String) {
-        getSharedPreferences(TOKEN_SHARED_PREFERENCES, MODE_PRIVATE).edit().apply {
-            putString(TOKEN_SHARED_PREFERENCES, token)
-            apply()
-        }
+        chart.invalidate()
     }
 
     companion object {

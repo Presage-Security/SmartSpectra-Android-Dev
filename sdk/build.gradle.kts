@@ -3,6 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("maven-publish")
     id("signing")
+    id("kotlin-parcelize")
 }
 
 android {
@@ -91,8 +92,8 @@ publishing {
     repositories {
 	maven {
 	    credentials {
-		username = "$usr"
-		password = "$pwd"
+            username = "$usr"
+            password = "$pwd"
 	    }
 	    url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
        }
