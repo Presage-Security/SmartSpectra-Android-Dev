@@ -24,7 +24,6 @@ import timber.log.Timber
 
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var tokenEditText: EditText
     private lateinit var smartSpectraButton: SmartSpectraButton
     private lateinit var resultView: SmartSpectraResultView
     private lateinit var chart: LineChart
@@ -41,22 +40,12 @@ class MainActivity : AppCompatActivity() {
 
         smartSpectraButton.setResultListener(resultListener)
 
-        // API Key Entry
-        tokenEditText = findViewById(R.id.text_api_token)
-        tokenEditText.setOnEditorActionListener { _, _, _ ->
-            val token = tokenEditText.text.toString().trim()
-            saveToken(token)
-            smartSpectraButton.setApiKey(token)
-            true
-        }
-        val storedToken = loadToken()
-        smartSpectraButton.setApiKey(storedToken)
-        tokenEditText.setText(storedToken)
+        // Your api token from https://physiology.presagetech.com/
+        smartSpectraButton.setApiKey("YOUR_API_KEY")
 
         // In case of unsupported devices
         if (!isSupportedAbi()) {
             smartSpectraButton.isEnabled = false
-            tokenEditText.isEnabled = false
             Toast.makeText(this, "Unsupported device (ABI)", Toast.LENGTH_LONG).show()
             Timber.d("Unsupported device (ABI)")
             Timber.d("This device ABIs: ${Build.SUPPORTED_ABIS.contentToString()}")
@@ -79,18 +68,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
         return false
-    }
-
-    private fun loadToken(): String {
-        return getSharedPreferences(TOKEN_SHARED_PREFERENCES, MODE_PRIVATE)
-            .getString(TOKEN_SHARED_PREFERENCES, null) ?: ""
-    }
-
-    private fun saveToken(token: String) {
-        getSharedPreferences(TOKEN_SHARED_PREFERENCES, MODE_PRIVATE).edit().apply {
-            putString(TOKEN_SHARED_PREFERENCES, token)
-            apply()
-        }
     }
 
     /**
@@ -129,9 +106,5 @@ class MainActivity : AppCompatActivity() {
 
         chart.data = lineData
         chart.invalidate()
-    }
-
-    companion object {
-        const val TOKEN_SHARED_PREFERENCES = "demo_api_key"
     }
 }
