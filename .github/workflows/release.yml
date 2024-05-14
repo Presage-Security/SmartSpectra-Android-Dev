@@ -12,19 +12,19 @@ jobs:
     - name: Checkout sources
       uses: actions/checkout@v4
 
-    - name: Update sdk/build.gradle.kts
-      run: |
-        set -e
-        awk 'BEGIN{FS=OFS="\""} /version = "1.0.*"/ {split($2, arr, "."); arr[3]++; $2=arr[1]"."arr[2]"."arr[3]"-SNAPSHOT"} 1' sdk/build.gradle.kts > temp_file && mv temp_file sdk/build.gradle.kts
-
-    - name: Amend the last commit
-      run: |
-        git config --global user.email "gitbot@presagetech.com"
-        git config --global user.name "Presage Tech Git Bot"
-        git add sdk/build.gradle.kts
-        git commit -m "Update Version"
-        git push
-        echo "Complete"
+        #- name: Update sdk/build.gradle.kts
+        #run: |
+        #set -e
+        #awk 'BEGIN{FS=OFS="\""} /version = "1.0.*"/ {split($2, arr, "."); arr[3]++; $2=arr[1]"."arr[2]"."arr[3]"-SNAPSHOT"} 1' sdk/build.gradle.kts > temp_file && mv temp_file sdk/build.gradle.kts
+        #
+        #- name: Amend the last commit
+        #run: |
+        #git config --global user.email "gitbot@presagetech.com"
+        #git config --global user.name "Presage Tech Git Bot"
+        #git add sdk/build.gradle.kts
+        #git commit -m "Update Version"
+        #git push
+        #echo "Complete"
 
     - name: Setup Java
       uses: actions/setup-java@v4
