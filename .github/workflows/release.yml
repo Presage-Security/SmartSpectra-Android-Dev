@@ -15,7 +15,7 @@ jobs:
     - name: Update sdk/build.gradle.kts
       run: |
         set -e
-        sed -i 's/\(version = "[0-9]*\.[0-9]*\.\)\([0-9]*\)\(-SNAPSHOT"\)/echo "\1$((\2 + 1))\3"/e' sdk/build.gradle.kts
+        awk 'BEGIN{FS=OFS="\""} /version = "1.0.*"/ {split($2, arr, "."); arr[3]++; $2=arr[1]"."arr[2]"."arr[3]"-SNAPSHOT"} 1' sdk/build.gradle.kts > temp_file && mv temp_file sdk/build.gradle.kts
 
     - name: Amend the last commit
       run: |
