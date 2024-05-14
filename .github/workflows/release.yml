@@ -14,14 +14,15 @@ jobs:
 
     - name: Update sdk/build.gradle.kts
       run: |
+        set -e
         sed -i 's/\(version = "[0-9]*\.[0-9]*\.\)\([0-9]*\)\(-SNAPSHOT"\)/echo "\1$((\2 + 1))\3"/e' sdk/build.gradle.kts
-
 
     - name: Amend the last commit
       run: |
         git config --global user.email "gitbot@presagetech.com"
         git config --global user.name "Presage Tech Git Bot"
-        git commit -a --amend --no-edit
+        git add sdk/build.gradle.kts
+        git commit -m "Update Version"
         git push
         echo "Complete"
 
