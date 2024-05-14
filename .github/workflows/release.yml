@@ -14,15 +14,21 @@ jobs:
 
     - name: Update sdk/build.gradle.kts
       run: |
-        sed -ri 's/(.*version = )([0-9]+)(.*)-SNAPSHOT/echo "\1$((\2+1))\3-SNAPSHOT"/ge' sdk/build.gradle.kts
+        sed -ri 's/(.*version = ")([0-9]+)(.*)-SNAPSHOT"/echo "\1$((\2+1))\3-SNAPSHOT"/ge' sdk/build.gradle.kts
 
     - name: Amend the last commit
       run: |
         git config --global user.email "gitbot@presagetech.com"
         git config --global user.name "Presage Tech Git Bot"
         git commit -a --amend --no-edit
-        git push --force-with-lease
+        git push
         echo "Complete"
+
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '21'
 
     - name: Setup Gradle
       uses: gradle/gradle-build-action@v3
