@@ -33,6 +33,9 @@ jobs:
         java-version: '21'
         cache: gradle
 
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+
           #- name: Setup Gradle
           #uses: gradle/gradle-build-action@v3
 
