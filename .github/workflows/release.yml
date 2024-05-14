@@ -21,6 +21,7 @@ jobs:
         git config --global user.email "gitbot@presagetech.com"
         git config --global user.name "Presage Tech Git Bot"
         git commit -a --amend --no-edit
+        git pull
         git push
         echo "Complete"
 
