@@ -8,14 +8,20 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container:
-      image: cimg/android:2024.04.1
-      env:
-        MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
-        MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
     steps:
     - name: Checkout sources
       uses: actions/checkout@v4
+
+    - name: Run the build process with Docker
+      uses: addnab/docker-run-action@v3
+      with:
+        image: cimg/android:2024.04.1
+        options: -v ${{ github.workspace }}:/workspace
+        run: |
+          env
+          cd /workspace
+          ls -latr
+          ./gradlew publish
 
         #- name: Update sdk/build.gradle.kts
         #run: |
@@ -30,8 +36,3 @@ jobs:
         #git commit -m "Update Version"
         #git push
         #echo "Complete"
-    - name:
-      run: |
-        cd /workspace
-        ls -latr
-        ./gradlew publish
