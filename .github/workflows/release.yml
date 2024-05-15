@@ -13,8 +13,6 @@ jobs:
       env:
         MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
         MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
-      volumes:
-        - $(pwd):/workspace
     steps:
     - name: Checkout sources
       uses: actions/checkout@v4
