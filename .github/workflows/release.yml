@@ -8,6 +8,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: cimg/android:2024.04.1
+      env:
+        MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+        MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
+      volumes:
+        - $(pwd):/workspace
     steps:
     - name: Checkout sources
       uses: actions/checkout@v4
@@ -25,22 +32,8 @@ jobs:
         #git commit -m "Update Version"
         #git push
         #echo "Complete"
-
-    - name: Setup Java
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '21'
-        cache: gradle
-
-    - name: Remove gradle folder
-      run: rm -rf .gradle/
-
-    - name: Setup Gradle
-      uses: gradle/gradle-build-action@v3
-
-    - name: Debug Gradle
-      run: ./gradlew --version
-
-    - name: Build with Gradle
-      run: cd sdk; ../gradlew publish
+    - name:
+      run: |
+        cd /workspace
+        ls -latr
+        ./gradlew publish
