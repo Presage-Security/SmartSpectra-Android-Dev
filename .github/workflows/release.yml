@@ -26,6 +26,7 @@ jobs:
         MAVEN_USER: ${{ secrets.MAVEN_USER }}
         MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
       run: |
+        rm -rf ~/.gradle
         echo $KEYSTORE | base64 -d > sdk/presagetech.gpg
         pwd
         ls -latr sdk/
