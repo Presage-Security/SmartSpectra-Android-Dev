@@ -37,7 +37,7 @@ jobs:
         echo signing.password=$GPG_PASSWORD >> ~/.gradle/gradle.properties
         echo signing.secretKeyRingFile=presagetech.gpg >> ~/.gradle/gradle.properties
         cat ~/.gradle/gradle.properties
-        ./gradlew publish
+        ./gradlew publish --debug
 
         #- name: Update sdk/build.gradle.kts
         #run: |
