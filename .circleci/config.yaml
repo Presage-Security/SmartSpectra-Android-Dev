@@ -22,7 +22,7 @@ jobs:
             gpg --list-secret-keys admins@presagetech.com
             mkdir -p ~/.gradle
             echo "signing.keyId=C88C6A20" > ~/.gradle/gradle.properties
-            echo "signing.password=$($GPG_PASSWORD | base64 -d)" >> ~/.gradle/gradle.properties
+            echo "signing.password=$(echo $GPG_PASSWORD | base64 -d)" >> ~/.gradle/gradle.properties
             echo "signing.secretKeyRingFile=presagetech.gpg" >> ~/.gradle/gradle.properties
             cat ~/.gradle/gradle.properties
       - run:
