@@ -7,8 +7,8 @@ jobs:
     steps:
       - checkout
       - add_ssh_keys:
-        fingerprints:
-        - "SHA256:FVO9d8IltmL/5RIRNgwO9Zicodrxq8M5ZfosG3UuYt4"
+          fingerprints:
+            - "SHA256:FVO9d8IltmL/5RIRNgwO9Zicodrxq8M5ZfosG3UuYt4"
       - run:
           name: Release
           command: |
