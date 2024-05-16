@@ -8,6 +8,12 @@ jobs:
       - run:
           name: Release
           command: |
+            #awk 'BEGIN{FS=OFS="\""} /version = "1.0.*"/ {split($2, arr, "."); arr[3]++; $2=arr[1]"."arr[2]"."arr[3]"-SNAPSHOT"} 1' sdk/build.gradle.kts > temp_file && mv temp_file sdk/build.gradle.kts
+            #git config --global user.email "gitbot@presagetech.com"
+            #git config --global user.name "Presage Tech Git Bot"
+            #git add sdk/build.gradle.kts
+            #git commit -m "Update Version"
+            #git push
             echo $KEYSTORE | base64 -d > sdk/presagetech.gpg
             pwd
             ls -latr sdk/
