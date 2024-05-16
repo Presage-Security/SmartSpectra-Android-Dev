@@ -5,6 +5,7 @@ jobs:
     docker:
       - image: cimg/android:2024.04.1
     steps:
+      - checkout
       - run:
           name: Release
           command: |
