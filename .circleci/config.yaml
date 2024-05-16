@@ -1,0 +1,30 @@
+version: 2.1
+
+jobs:
+  build:
+    docker:
+      - image: cimg/android:2024.04.1
+    steps:
+      - run:
+          name: Release
+          command: |
+            echo $KEYSTORE | base64 -d > sdk/presagetech.gpg
+            pwd
+            ls -latr sdk/
+            echo "$GPG_SIGNING_KEY" | base64 --decode | gpg --pinentry-mode loopback --passphrase "$GPG_PASSWORD" --import
+            gpg --list-secret-keys admins@presagetech.com
+            mkdir -p ~/.gradle
+            echo "signing.keyId=C88C6A20" > ~/.gradle/gradle.properties
+            echo "signing.password=$GPG_PASSWORD" >> ~/.gradle/gradle.properties
+            echo "signing.secretKeyRingFile=presagetech.gpg" >> ~/.gradle/gradle.properties
+            cat ~/.gradle/gradle.properties
+      - run:
+          name: Build and publish
+          command: ./gradlew publish
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build
+
