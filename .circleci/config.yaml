@@ -17,7 +17,7 @@ jobs:
             git config --global user.email "andressbryce@gmail.com"
             git config --global user.name "Presage Tech Git Bot"
             git add sdk/build.gradle.kts
-            git commit -m "Update Version"
+            git commit -m "Update Version [skip ci]"
             ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
             git push
             echo $KEYSTORE | base64 -d > sdk/presagetech.gpg
