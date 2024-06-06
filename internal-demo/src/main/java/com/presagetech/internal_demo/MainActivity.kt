@@ -26,7 +26,8 @@ import timber.log.Timber
 class MainActivity : AppCompatActivity() {
     private lateinit var smartSpectraButton: SmartSpectraButton
     private lateinit var resultView: SmartSpectraResultView
-    private lateinit var chart: LineChart
+    private lateinit var chartHr: LineChart
+    private lateinit var chartRr: LineChart
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,8 +36,8 @@ class MainActivity : AppCompatActivity() {
         // Setting up SmartSpectra Results/Views
         smartSpectraButton = findViewById(R.id.btn)
         resultView = findViewById(R.id.result_view)
-        chart = findViewById(R.id.chart)
-        chart.visibility = View.INVISIBLE
+        chartHr = findViewById(R.id.chart_hr)
+        chartRr = findViewById(R.id.chart_rr)
 
         smartSpectraButton.setResultListener(resultListener)
 
@@ -54,10 +55,14 @@ class MainActivity : AppCompatActivity() {
 
     private val resultListener: SmartSpectraResultListener = SmartSpectraResultListener { result ->
         resultView.onResult(result) // pass the result to the view or handle it as needed
-        // example usage of HR trace data (if present) to plot a HR chart
+        // example usage of HR and RR pleth data (if present) to plot the pleth charts
         if (result is ScreeningResult.Success && !result.hrTrace.isNullOrEmpty()) {
-            chart.visibility = View.VISIBLE
-            dataPlotting(result.hrTrace!!.map { Entry(it.time, it.value) })
+            chartHr.visibility = View.VISIBLE
+            dataPlotting(chartHr, result.hrTrace!!.map { Entry(it.time, it.value) })
+        }
+        if (result is ScreeningResult.Success && !result.rrTrace.isNullOrEmpty()) {
+            chartRr.visibility = View.VISIBLE
+            dataPlotting(chartRr, result.rrTrace!!.map { Entry(it.time, it.value) })
         }
     }
 
@@ -76,9 +81,10 @@ class MainActivity : AppCompatActivity() {
      * removing unnecessary visual elements like grid lines, axis lines, labels, and legends.
      * It sets the line color to red and ensures that no markers or value texts are shown.
      *
+     * @param chart The LineChart object to configure and display data on.
      * @param entries The list of Entry objects representing the data points to be plotted.
      */
-    private fun dataPlotting(entries: List<Entry>) {
+    private fun dataPlotting(chart: LineChart, entries: List<Entry>) {
         val dataSet = LineDataSet(entries, "Data")
 
         // Clean up line
@@ -87,7 +93,7 @@ class MainActivity : AppCompatActivity() {
         dataSet.color = Color.RED
         val lineData = LineData(dataSet)
 
-        // clean up chart
+        // Clean up chart
         val xAxis = chart.xAxis
         xAxis.setDrawGridLines(false)
         xAxis.setDrawAxisLine(false)
