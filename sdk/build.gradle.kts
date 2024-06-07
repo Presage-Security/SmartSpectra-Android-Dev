@@ -92,8 +92,8 @@ publishing {
     repositories {
 	maven {
 	    credentials {
-            username = "$usr"
-            password = "$pwd"
+		      username = project.findProperty("MAVEN_USER") as String? ?: System.getenv("MAVEN_USER")
+          password = project.findProperty("MAVEN_PASSWORD") as String? ?: System.getenv("MAVEN_PASSWORD")
 	    }
 	    url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
        }
@@ -105,7 +105,7 @@ publishing {
             }
             groupId = "com.presagetech"
             artifactId = "smartspectra"
-            version = "1.0.0-SNAPSHOT"
+	    version = "1.0.4-SNAPSHOT"
             pom {
                 name.set("Physiology SDK")
                 description.set("Heart and respiration rate measurement by Presage Technologies")
