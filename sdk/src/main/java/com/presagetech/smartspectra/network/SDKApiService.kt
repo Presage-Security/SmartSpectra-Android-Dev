@@ -10,7 +10,7 @@ class SDKApiService(private val token: String) {
 
     suspend fun postUploadURL(body: JSONObject): JSONObject? {
         return HttpMethods.post(
-            url = getUrl("v1/upload-url"),
+            url = getUrl("v2/upload-url"),
             body = body.toString(),
             headers = getDefaultHeaders()
         ).responseBody?.let {
@@ -20,7 +20,7 @@ class SDKApiService(private val token: String) {
 
     suspend fun postComplete(body: JSONObject): String? {
         return HttpMethods.post(
-            url = getUrl("v1/complete"),
+            url = getUrl("v2/complete"),
             body = body.toString(),
             headers = getDefaultHeaders()
         ).responseBody

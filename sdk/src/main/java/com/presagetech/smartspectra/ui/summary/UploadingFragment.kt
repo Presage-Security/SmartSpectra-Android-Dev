@@ -57,8 +57,7 @@ class UploadingFragment : Fragment() {
         viewModel.uploadProgressLiveData.observe(viewLifecycleOwner, ::handleUploadingState)
         viewModel.rrHRAveragePairLiveData.observe(viewLifecycleOwner) {
             requireActivity().setResult(Activity.RESULT_OK, Intent().apply {
-                putExtra(SmartSpectraActivity.RESULT_HR_KEY, it.hrAverage)
-                putExtra(SmartSpectraActivity.RESULT_RR_KEY, it.rrAverage)
+                putExtra(SmartSpectraActivity.RESULT_DATA_KEY, it)
             })
             requireActivity().finish()
         }

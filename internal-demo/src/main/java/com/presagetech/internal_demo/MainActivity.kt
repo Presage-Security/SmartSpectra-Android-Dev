@@ -1,44 +1,68 @@
 package com.presagetech.internal_demo
 
+
+import android.graphics.Color
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.widget.EditText
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+
+// Plotting imports
+import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
+
+// SmartSpectra SDK Specific Imports
 import com.presagetech.smartspectra.SmartSpectraButton
+import com.presagetech.smartspectra.SmartSpectraResultListener
 import com.presagetech.smartspectra.SmartSpectraResultView
+import com.presagetech.smartspectra.ScreeningResult
 import timber.log.Timber
 
+
 class MainActivity : AppCompatActivity() {
-    private lateinit var tokenEditText: EditText
     private lateinit var smartSpectraButton: SmartSpectraButton
+    private lateinit var resultView: SmartSpectraResultView
+    private lateinit var chartHr: LineChart
+    private lateinit var chartRr: LineChart
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // Setting up SmartSpectra Results/Views
         smartSpectraButton = findViewById(R.id.btn)
-        val resultView = findViewById<SmartSpectraResultView>(R.id.result_view)
-        smartSpectraButton.setResultListener(resultView)
+        resultView = findViewById(R.id.result_view)
+        chartHr = findViewById(R.id.chart_hr)
+        chartRr = findViewById(R.id.chart_rr)
 
-        tokenEditText = findViewById(R.id.text_api_token)
-        tokenEditText.setOnEditorActionListener { _, _, _ ->
-            val token = tokenEditText.text.toString().trim()
-            saveToken(token)
-            smartSpectraButton.setApiKey(token)
-            true
-        }
-        
-        val storedToken = loadToken()
-        smartSpectraButton.setApiKey(storedToken)
-        tokenEditText.setText(storedToken)
+        smartSpectraButton.setResultListener(resultListener)
 
+        // Your api token from https://physiology.presagetech.com/
+        smartSpectraButton.setApiKey("YOUR_API_KEY")
+
+        // In case of unsupported devices
         if (!isSupportedAbi()) {
             smartSpectraButton.isEnabled = false
-            tokenEditText.isEnabled = false
             Toast.makeText(this, "Unsupported device (ABI)", Toast.LENGTH_LONG).show()
             Timber.d("Unsupported device (ABI)")
             Timber.d("This device ABIs: ${Build.SUPPORTED_ABIS.contentToString()}")
+        }
+    }
+
+    private val resultListener: SmartSpectraResultListener = SmartSpectraResultListener { result ->
+        resultView.onResult(result) // pass the result to the view or handle it as needed
+        // example usage of HR and RR pleth data (if present) to plot the pleth charts
+        if (result is ScreeningResult.Success && !result.hrTrace.isNullOrEmpty()) {
+            chartHr.visibility = View.VISIBLE
+            dataPlotting(chartHr, result.hrTrace!!.map { Entry(it.time, it.value) })
+        }
+        if (result is ScreeningResult.Success && !result.rrTrace.isNullOrEmpty()) {
+            chartRr.visibility = View.VISIBLE
+            dataPlotting(chartRr, result.rrTrace!!.map { Entry(it.time, it.value) })
         }
     }
 
@@ -51,19 +75,42 @@ class MainActivity : AppCompatActivity() {
         return false
     }
 
-    private fun loadToken(): String {
-        return getSharedPreferences(TOKEN_SHARED_PREFERENCES, MODE_PRIVATE)
-            .getString(TOKEN_SHARED_PREFERENCES, null) ?: ""
-    }
+    /**
+     * Configures and displays a line chart with the provided data entries.
+     * This function sets up the line chart to show a simplified and clean visualization,
+     * removing unnecessary visual elements like grid lines, axis lines, labels, and legends.
+     * It sets the line color to red and ensures that no markers or value texts are shown.
+     *
+     * @param chart The LineChart object to configure and display data on.
+     * @param entries The list of Entry objects representing the data points to be plotted.
+     */
+    private fun dataPlotting(chart: LineChart, entries: List<Entry>) {
+        val dataSet = LineDataSet(entries, "Data")
 
-    private fun saveToken(token: String) {
-        getSharedPreferences(TOKEN_SHARED_PREFERENCES, MODE_PRIVATE).edit().apply {
-            putString(TOKEN_SHARED_PREFERENCES, token)
-            apply()
-        }
-    }
+        // Clean up line
+        dataSet.setDrawValues(false)
+        dataSet.setDrawCircles(false)
+        dataSet.color = Color.RED
+        val lineData = LineData(dataSet)
 
-    companion object {
-        const val TOKEN_SHARED_PREFERENCES = "demo_api_key"
+        // Clean up chart
+        val xAxis = chart.xAxis
+        xAxis.setDrawGridLines(false)
+        xAxis.setDrawAxisLine(false)
+        xAxis.setDrawLabels(false)
+        val leftAxis = chart.axisLeft
+        leftAxis.setDrawGridLines(false)
+        leftAxis.setDrawAxisLine(false)
+        leftAxis.setDrawLabels(false)
+        val rightAxis = chart.axisRight
+        rightAxis.setDrawGridLines(false)
+        rightAxis.setDrawAxisLine(false)
+        rightAxis.setDrawLabels(false)
+        chart.legend.isEnabled = false
+        chart.description.isEnabled = false
+        chart.onTouchListener = null
+
+        chart.data = lineData
+        chart.invalidate()
     }
 }

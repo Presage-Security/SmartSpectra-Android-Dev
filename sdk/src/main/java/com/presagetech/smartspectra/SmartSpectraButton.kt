@@ -42,12 +42,6 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
     init {
         tutorialHasBeenShown =
             PreferencesUtils.getBoolean(context, PreferencesUtils.Tutorial_Key, false)
-        val appInfo = context.packageManager.getApplicationInfo(
-            context.packageName,
-            PackageManager.GET_META_DATA
-        )
-        apiKey = appInfo.metaData?.getString(MANIFEST_KEY)
-
         orientation = HORIZONTAL
         gravity = Gravity.CENTER_VERTICAL
         background = ContextCompat.getDrawable(context, R.drawable.smart_spectra_button_background)
@@ -100,10 +94,7 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
     private fun onStartClicked(view: View) {
         require(resultListener != null) { "Have you forgotten to set the result listener?" }
         val key = apiKey ?: throw IllegalStateException(
-            "SDK API key is missing. " +
-                    "It was not found in AndroidManifest.xml meta-data $MANIFEST_KEY, " +
-                    "nor was it set via the .setApiKey() method. " +
-                    "Please refer to the documentation for more details."
+            "SDK API key is missing. Set via the .setApiKey() method."
         )
         screeningActivityLauncher.launch(ScreeningContractInput(key))
     }
@@ -144,9 +135,5 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
     private fun dpToPx(dp: Int): Int {
         val density = context.resources.displayMetrics.density
         return (dp * density).roundToInt()
-    }
-
-    companion object {
-        const val MANIFEST_KEY = "com.presagetech.smartspectra.api_key"
     }
 }

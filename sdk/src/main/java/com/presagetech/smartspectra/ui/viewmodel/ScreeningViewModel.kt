@@ -1,5 +1,6 @@
 package com.presagetech.smartspectra.ui.viewmodel
 
+import android.os.Parcelable
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -9,6 +10,7 @@ import com.presagetech.smartspectra.ui.summary.UploadingState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import kotlinx.parcelize.Parcelize
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -147,7 +149,7 @@ class ScreeningViewModel(
                 Timber.i("retrieveData #$attempt: failed to parse response")
                 null
             }
-            if (json != null && json.has("rr")) {
+            if (json != null && json.has("pressure")) {
                 return parseRetrieveDataResponse(json)
             } else {
                 delay(retryDelay)
@@ -164,39 +166,72 @@ class ScreeningViewModel(
             })
         }
 
+
+    /*
+        Parses json like:
+        [ "2.036": { "value": -0.0042 }, ... ]
+     */
+    private fun parseFloatToValueArray(json: JSONObject): List<Pair<Float, Float>> {
+        val result = ArrayList<Pair<Float, Float>>()
+        val keys = json.keys()
+        while (keys.hasNext()) {
+            val key = keys.next()
+            val value = json.getJSONObject(key).getDouble("value").toFloat()
+            result.add(Pair(key.toFloat(), value))
+        }
+        return result
+    }
+
     private fun parseRetrieveDataResponse(response: JSONObject): RetrievedData {
-        val rrObject = response.getJSONObject("rr")
-        val rrIterator = rrObject.keys()
-        var rrSum = 0.0
-        var rrCount = 0
-        while (rrIterator.hasNext()) {
-            val key = rrIterator.next()
-            val rrValue = rrObject.getJSONObject(key).getDouble("value")
-            rrSum += rrValue
-            rrCount++
+        val hrObject = response.getJSONObject("pulse").getJSONObject("hr")
+        val hrAverage = parseFloatToValueArray(hrObject)
+            .map { it.second }.average()
+            .let {
+                if (it.isFinite()) it else 0.0
+            }
+        val hrTrace: List<Pair<Float, Float>>? = try {
+            response
+                .getJSONObject("pulse")
+                .getJSONObject("hr_trace").let {
+                    parseFloatToValueArray(it)
+                }.sortedBy { it.first }
+                .ifEmpty { null }
+        } catch (e: JSONException) {
+            null
         }
-        val rrAverage = if (rrCount > 0) rrSum / rrCount else 0.0
 
-
-        val hrObject = response.getJSONObject("hr")
-        val hrIterator = hrObject.keys()
-        var hrSum = 0.0
-        var hrCount = 0
-
-        while (hrIterator.hasNext()) {
-            val key = hrIterator.next()
-            val hrValue = hrObject.getJSONObject(key).getDouble("value")
-            hrSum += hrValue
-            hrCount++
+        val rrObject = response.getJSONObject("breath").getJSONObject("rr")
+        val rrAverage = parseFloatToValueArray(rrObject)
+            .map { it.second }.average()
+            .let {
+                if (it.isFinite()) it else 0.0
+            }
+        val rrTrace: List<Pair<Float, Float>>? = try {
+            response
+                .getJSONObject("breath")
+                .getJSONObject("rr_trace").let {
+                    parseFloatToValueArray(it)
+                }.sortedBy { it.first }
+                .ifEmpty { null }
+        } catch (e: JSONException) {
+            null
         }
-        val hrAverage = if (hrCount > 0) hrSum / hrCount else 0.0
-        val result = RetrievedData(rrAverage, hrAverage)
+
+        val result = RetrievedData(
+            hrAverage,
+            hrTrace,
+            rrAverage,
+            rrTrace,
+        )
         Timber.d("parseRetrieveDataResponse: $result")
         return result
     }
 
+    @Parcelize
     data class RetrievedData(
-        val rrAverage: Double,
         val hrAverage: Double,
-    )
+        val hrTrace: List<Pair<Float, Float>>?,
+        val rrAverage: Double,
+        val rrTrace: List<Pair<Float, Float>>?,
+    ): Parcelable
 }

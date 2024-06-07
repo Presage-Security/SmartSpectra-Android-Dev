@@ -39,7 +39,7 @@ import java.util.*
 
 @ExperimentalCamera2Interop
 class CameraProcessFragment : Fragment() {
-    private val BINARY_GRAPH_NAME = "preprocessing_gpu.binarypb"
+    private val BINARY_GRAPH_NAME = "preprocessing_gpu_spot_json.binarypb"
     private val INPUT_VIDEO_STREAM_NAME = "input_video"
     private val SELECTED_INPUT_STREAM_NAME = "start_button_pre"
 
@@ -202,7 +202,7 @@ class CameraProcessFragment : Fragment() {
 
     private fun handleJsonDataPacket(packet: Packet?) {
         if (packet == null) return
-        val outputJson = PacketGetter.getJSONPresage(packet)
+        val outputJson = PacketGetter.getJson(packet)
         viewModel.setJsonData(outputJson)
         if (Config.SAVE_JSONs) {
             saveJsonLocally(outputJson)

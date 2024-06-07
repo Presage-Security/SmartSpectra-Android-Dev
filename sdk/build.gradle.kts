@@ -3,6 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("maven-publish")
     id("signing")
+    id("kotlin-parcelize")
 }
 
 android {
@@ -91,8 +92,8 @@ publishing {
     repositories {
 	maven {
 	    credentials {
-		username = project.findProperty("MAVEN_USER") as String? ?: System.getenv("MAVEN_USER")
-                password = project.findProperty("MAVEN_PASSWORD") as String? ?: System.getenv("MAVEN_PASSWORD")
+		      username = project.findProperty("MAVEN_USER") as String? ?: System.getenv("MAVEN_USER")
+          password = project.findProperty("MAVEN_PASSWORD") as String? ?: System.getenv("MAVEN_PASSWORD")
 	    }
 	    url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
        }

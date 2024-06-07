@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import com.presagetech.smartspectra.ui.SmartSpectraActivity
+import com.presagetech.smartspectra.ui.viewmodel.ScreeningViewModel
 
 class ScreeningContractInput(
     val apiKey: String // Physiology SDK API key, find more https://physiology.presagetech.com/
@@ -20,11 +21,16 @@ class ScreeningContract : ActivityResultContract<ScreeningContractInput, Screeni
     override fun parseResult(resultCode: Int, intent: Intent?): ScreeningResult {
         return if (resultCode == Activity.RESULT_OK) {
             requireNotNull(intent)
-            require(intent.hasExtra(SmartSpectraActivity.RESULT_HR_KEY))
-            require(intent.hasExtra(SmartSpectraActivity.RESULT_RR_KEY))
+            @Suppress("DEPRECATION")
+            val data = intent.getParcelableExtra(SmartSpectraActivity.RESULT_DATA_KEY)
+                    as? ScreeningViewModel.RetrievedData
+                ?: throw IllegalArgumentException("Missing response")
+
             ScreeningResult.Success(
-                intent.getDoubleExtra(SmartSpectraActivity.RESULT_HR_KEY, 0.0),
-                intent.getDoubleExtra(SmartSpectraActivity.RESULT_RR_KEY, 0.0)
+                data.hrAverage,
+                data.hrTrace?.map { TraceEntry(it.first, it.second) },
+                data.rrAverage,
+                data.rrTrace?.map { TraceEntry(it.first, it.second) },
             )
         } else {
             ScreeningResult.Failed

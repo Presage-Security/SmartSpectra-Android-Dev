@@ -7,6 +7,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import kotlin.math.roundToInt
+import org.json.JSONObject
 
 class SmartSpectraResultView(
     context: Context,
@@ -31,12 +32,14 @@ class SmartSpectraResultView(
     }
 
     private fun success(result: ScreeningResult.Success) {
-        val rr = result.rrAverage.roundToInt()
-        val hr = result.hrAverage.roundToInt()
-        descriptionTextView.text = context.getString(R.string.rr_hr_values, rr, hr)
+        val strictBreathingRate = result.rrAverage.roundToInt()
+        val strictPulseRate = result.hrAverage.roundToInt()
+        descriptionTextView.text = context.getString(R.string.rr_hr_values,
+            strictBreathingRate, strictPulseRate)
     }
 
     private fun failed() {
         descriptionTextView.setText(R.string.rr_hr_empty)
     }
 }
+
