@@ -11,6 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.RawValue
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -181,8 +182,19 @@ class ScreeningViewModel(
         }
         return result
     }
+    private fun parseBoolToValueArray(json: JSONObject): List<Pair<Float, Boolean>> {
+        val result = ArrayList<Pair<Float, Boolean>>()
+        val keys = json.keys()
+        while (keys.hasNext()) {
+            val key = keys.next()
+            val value = json.getJSONObject(key).getBoolean("value")
+            result.add(Pair(key.toFloat(), value))
+        }
+        return result
+    }
 
     private fun parseRetrieveDataResponse(response: JSONObject): RetrievedData {
+        val resultObject = response
         val hrObject = response.getJSONObject("pulse").getJSONObject("hr")
         val hrAverage = parseFloatToValueArray(hrObject)
             .map { it.second }.average()
@@ -201,6 +213,7 @@ class ScreeningViewModel(
         }
 
         val rrObject = response.getJSONObject("breath").getJSONObject("rr")
+
         val rrAverage = parseFloatToValueArray(rrObject)
             .map { it.second }.average()
             .let {
@@ -217,21 +230,113 @@ class ScreeningViewModel(
             null
         }
 
+        val amplitude: List<Pair<Float, Float>>? = try {
+            response
+                .getJSONObject("breath")
+                .getJSONObject("amplitude").let {
+                    parseFloatToValueArray(it)
+                }.sortedBy { it.first }
+                .ifEmpty { null }
+        } catch (e: JSONException) {
+            null
+        }
+
+        val baseline: List<Pair<Float, Float>>? = try {
+            response
+                .getJSONObject("breath")
+                .getJSONObject("baseline").let {
+                    parseFloatToValueArray(it)
+                }.sortedBy { it.first }
+                .ifEmpty { null }
+        } catch (e: JSONException) {
+            null
+        }
+
+        val ie: List<Pair<Float, Float>>? = try {
+            response
+                .getJSONObject("breath")
+                .getJSONObject("ie").let {
+                    parseFloatToValueArray(it)
+                }.sortedBy { it.first }
+                .ifEmpty { null }
+        } catch (e: JSONException) {
+            null
+        }
+
+        val rrl: List<Pair<Float, Float>>? = try {
+            response
+                .getJSONObject("breath")
+                .getJSONObject("rrl").let {
+                    parseFloatToValueArray(it)
+                }.sortedBy { it.first }
+                .ifEmpty { null }
+        } catch (e: JSONException) {
+            null
+        }
+
+        val phasic: List<Pair<Float, Float>>? = try {
+            response
+                .getJSONObject("pressure")
+                .getJSONObject("phasic").let {
+                    parseFloatToValueArray(it)
+                }.sortedBy { it.first }
+                .ifEmpty { null }
+        } catch (e: JSONException) {
+            null
+        }
+
+        val hrv: List<Pair<Float, Float>>? = try {
+            response
+                .getJSONObject("pulse")
+                .getJSONObject("hrv").let {
+                    parseFloatToValueArray(it)
+                }.sortedBy { it.first }
+                .ifEmpty { null }
+        } catch (e: JSONException) {
+            null
+        }
+
+        val apnea: List<Pair<Float, Boolean>>? = try {
+            response
+                .getJSONObject("breath")
+                .getJSONObject("apnea").let {
+                    parseBoolToValueArray(it)
+                }.sortedBy { it.first }
+                .ifEmpty { null }
+        } catch (e: JSONException) {
+            null
+        }
+
         val result = RetrievedData(
+            //resultObject,
             hrAverage,
             hrTrace,
             rrAverage,
             rrTrace,
+            amplitude,
+            apnea,
+            baseline,
+            ie,
+            rrl,
+            phasic,
+            hrv
         )
-        Timber.d("parseRetrieveDataResponse: $result")
         return result
     }
 
     @Parcelize
     data class RetrievedData(
+        //val resultObject: @RawValue JSONObject?,
         val hrAverage: Double,
         val hrTrace: List<Pair<Float, Float>>?,
         val rrAverage: Double,
         val rrTrace: List<Pair<Float, Float>>?,
-    ): Parcelable
+        val amplitude: List<Pair<Float, Float>>?,
+        val apnea: List<Pair<Float,Boolean>>?,
+        val baseline: List<Pair<Float, Float>>?,
+        val ie: List<Pair<Float, Float>>?,
+        val rrl: List<Pair<Float, Float>>?,
+        val phasic: List<Pair<Float, Float>>?,
+        val hrv: List<Pair<Float, Float>>?,
+        ): Parcelable
 }

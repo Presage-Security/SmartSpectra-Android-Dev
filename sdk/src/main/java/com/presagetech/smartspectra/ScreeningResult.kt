@@ -13,6 +13,20 @@ sealed class ScreeningResult {
 
         // Breathing rate trace is a list sorted by time in seconds.
         val rrTrace: List<TraceEntry>?,
+
+        val baseline: List<TraceEntry>?,
+
+        val amplitude: List<TraceEntry>?,
+
+        val ie: List<TraceEntry>?,
+
+        val rrl: List<TraceEntry>?,
+
+        val phasic: List<TraceEntry>?,
+
+        val hrv: List<TraceEntry>?,
+
+        val apnea: List<ApneaEntry>?
     ) : ScreeningResult() {
         init {
             // Ensure that double values are finite and non-negative.
@@ -25,6 +39,27 @@ sealed class ScreeningResult {
             require(rrAverage.isFinite() && rrAverage >= 0.0)
             require(rrTrace == null || rrTrace.isNotEmpty() && rrTrace.isSorted())
             rrTrace?.forEach { require(it.time.isFinite() && it.value.isFinite()) }
+
+            require(baseline == null || baseline.isNotEmpty() && baseline.isSorted())
+            baseline?.forEach { require(it.time.isFinite() && it.value.isFinite()) }
+
+            require(amplitude == null || amplitude.isNotEmpty() && amplitude.isSorted())
+            amplitude?.forEach { require(it.time.isFinite() && it.value.isFinite()) }
+
+            require(ie == null || ie.isNotEmpty() && ie.isSorted())
+            ie?.forEach { require(it.time.isFinite() && it.value.isFinite()) }
+
+            require(rrl == null || rrl.isNotEmpty() && rrl.isSorted())
+            rrl?.forEach { require(it.time.isFinite() && it.value.isFinite()) }
+
+            require(phasic == null || phasic.isNotEmpty() && phasic.isSorted())
+            phasic?.forEach { require(it.time.isFinite() && it.value.isFinite()) }
+
+            require(hrv == null || hrv.isNotEmpty() && hrv.isSorted())
+            hrv?.forEach { require(it.time.isFinite() && it.value.isFinite()) }
+
+            require(apnea == null || apnea.isNotEmpty() && apnea.sorted())
+            apnea?.forEach { require(it.time.isFinite()) }
         }
     }
 
@@ -36,4 +71,10 @@ class TraceEntry(
     val value: Float, // heart rate value
 )
 
+class ApneaEntry(
+    val time: Float, // time in seconds
+    val value: Boolean, // heart rate value
+)
+
 private fun List<TraceEntry>.isSorted() = zipWithNext { a, b -> a.time <= b.time }.all { it }
+private fun List<ApneaEntry>.sorted() = zipWithNext { a, b -> a.time <= b.time }.all { it }

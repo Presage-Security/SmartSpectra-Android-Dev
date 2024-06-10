@@ -31,7 +31,14 @@ class ScreeningContract : ActivityResultContract<ScreeningContractInput, Screeni
                 data.hrTrace?.map { TraceEntry(it.first, it.second) },
                 data.rrAverage,
                 data.rrTrace?.map { TraceEntry(it.first, it.second) },
-            )
+                data.amplitude?.map { TraceEntry(it.first, it.second) },
+                data.baseline?.map { TraceEntry(it.first, it.second) },
+                data.ie?.map { TraceEntry(it.first, it.second) },
+                data.rrl?.map { TraceEntry(it.first, it.second) },
+                data.phasic?.map { TraceEntry(it.first, it.second) },
+                data.hrv?.map { TraceEntry(it.first, it.second) },
+                data.apnea?.map { ApneaEntry(it.first, it.second) },
+                )
         } else {
             ScreeningResult.Failed
         }
