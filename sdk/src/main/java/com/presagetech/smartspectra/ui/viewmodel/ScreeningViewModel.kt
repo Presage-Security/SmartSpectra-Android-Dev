@@ -4,6 +4,7 @@ import android.os.Parcelable
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.common.flogger.parameter.DateTimeFormat
 import com.presagetech.smartspectra.network.SDKApiService
 import com.presagetech.smartspectra.network.model.ETag
 import com.presagetech.smartspectra.ui.summary.UploadingState
@@ -19,6 +20,8 @@ import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.lang.Integer.min
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.zip.GZIPOutputStream
 
 class ScreeningViewModel(
@@ -205,7 +208,9 @@ class ScreeningViewModel(
     }
 
     private fun parseRetrieveDataResponse(response: JSONObject): RetrievedData {
-        val resultObject = response
+        val version = response.getString("version")
+        val formatter = DateTimeFormatter.ofPattern("yyyyMMdd, HH:mm:ss")
+        val upload_date = LocalDateTime.parse(response.getString("upload_date"), formatter)
         val hrObject = response.getJSONObject("pulse").getJSONObject("hr")
         val hrAverage = parseFloatToValueArray(hrObject)
             .map { it.second }.average()
@@ -363,7 +368,6 @@ class ScreeningViewModel(
         }
 
         val result = RetrievedData(
-            //resultObject,
             hrAverage,
             hrTrace,
             rrAverage,
@@ -378,22 +382,23 @@ class ScreeningViewModel(
             ie,
             rrl,
             phasic,
-            hrv
+            hrv,
+            version,
+            upload_date
         )
         return result
     }
 
     @Parcelize
     data class RetrievedData(
-        //val resultObject: @RawValue JSONObject?,
         val hrAverage: Double,
         val hrTrace: List<Pair<Float, Float>>?,
         val rrAverage: Double,
-        val rrVals: List<Pair<Float, Float>>?,
-        val rrConfidence: List<Pair<Float, Float>>?,
+        val rrTrace: List<Pair<Float, Float>>?,
         val hrVals: List<Pair<Float, Float>>?,
         val hrConfidence: List<Pair<Float, Float>>?,
-        val rrTrace: List<Pair<Float, Float>>?,
+        val rrVals: List<Pair<Float, Float>>?,
+        val rrConfidence: List<Pair<Float, Float>>?,
         val amplitude: List<Pair<Float, Float>>?,
         val apnea: List<Pair<Float,Boolean>>?,
         val baseline: List<Pair<Float, Float>>?,
@@ -401,5 +406,7 @@ class ScreeningViewModel(
         val rrl: List<Pair<Float, Float>>?,
         val phasic: List<Pair<Float, Float>>?,
         val hrv: List<Pair<Float, Float>>?,
+        val version: String,
+        val upload_date: LocalDateTime
         ): Parcelable
 }

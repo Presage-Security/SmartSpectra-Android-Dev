@@ -1,5 +1,9 @@
 package com.presagetech.smartspectra
 
+import com.presagetech.smartspectra.ui.viewmodel.ScreeningViewModel
+import org.json.JSONObject
+import java.time.LocalDateTime
+
 sealed class ScreeningResult {
     data class Success(
         // Strict pulse rates are the average of only high confidence pulse rate values.
@@ -14,17 +18,19 @@ sealed class ScreeningResult {
         // Breathing rate trace is a list sorted by time in seconds.
         val rrTrace: List<TraceEntry>?,
 
-        val rrVals: List<TraceEntry>?,
-
-        val rrConfidence: List<TraceEntry>?,
-
         val hrVals: List<TraceEntry>?,
 
         val hrConfidence: List<TraceEntry>?,
 
-        val baseline: List<TraceEntry>?,
+        val rrVals: List<TraceEntry>?,
+
+        val rrConfidence: List<TraceEntry>?,
 
         val amplitude: List<TraceEntry>?,
+
+        val apnea: List<ApneaEntry>?,
+
+        val baseline: List<TraceEntry>?,
 
         val ie: List<TraceEntry>?,
 
@@ -34,7 +40,9 @@ sealed class ScreeningResult {
 
         val hrv: List<TraceEntry>?,
 
-        val apnea: List<ApneaEntry>?
+        val version: String,
+
+        val upload_date: LocalDateTime
     ) : ScreeningResult() {
         init {
             // Ensure that double values are finite and non-negative.
