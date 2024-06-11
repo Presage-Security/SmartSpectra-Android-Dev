@@ -182,6 +182,17 @@ class ScreeningViewModel(
         }
         return result
     }
+
+    private fun parseFloatToConfidenceArray(json: JSONObject): List<Pair<Float, Float>> {
+        val result = ArrayList<Pair<Float, Float>>()
+        val keys = json.keys()
+        while (keys.hasNext()) {
+            val key = keys.next()
+            val value = json.getJSONObject(key).getDouble("confidence").toFloat()
+            result.add(Pair(key.toFloat(), value))
+        }
+        return result
+    }
     private fun parseBoolToValueArray(json: JSONObject): List<Pair<Float, Boolean>> {
         val result = ArrayList<Pair<Float, Boolean>>()
         val keys = json.keys()
@@ -224,6 +235,50 @@ class ScreeningViewModel(
                 .getJSONObject("breath")
                 .getJSONObject("rr_trace").let {
                     parseFloatToValueArray(it)
+                }.sortedBy { it.first }
+                .ifEmpty { null }
+        } catch (e: JSONException) {
+            null
+        }
+
+        val rrVals: List<Pair<Float, Float>>? = try {
+            response
+                .getJSONObject("breath")
+                .getJSONObject("rr").let {
+                    parseFloatToValueArray(it)
+                }.sortedBy { it.first }
+                .ifEmpty { null }
+        } catch (e: JSONException) {
+            null
+        }
+
+        val rrConfidence: List<Pair<Float, Float>>? = try {
+            response
+                .getJSONObject("breath")
+                .getJSONObject("rr").let {
+                    parseFloatToConfidenceArray(it)
+                }.sortedBy { it.first }
+                .ifEmpty { null }
+        } catch (e: JSONException) {
+            null
+        }
+
+        val hrVals: List<Pair<Float, Float>>? = try {
+            response
+                .getJSONObject("pulse")
+                .getJSONObject("hr").let {
+                    parseFloatToValueArray(it)
+                }.sortedBy { it.first }
+                .ifEmpty { null }
+        } catch (e: JSONException) {
+            null
+        }
+
+        val hrConfidence: List<Pair<Float, Float>>? = try {
+            response
+                .getJSONObject("pulse")
+                .getJSONObject("hr").let {
+                    parseFloatToConfidenceArray(it)
                 }.sortedBy { it.first }
                 .ifEmpty { null }
         } catch (e: JSONException) {
@@ -313,6 +368,10 @@ class ScreeningViewModel(
             hrTrace,
             rrAverage,
             rrTrace,
+            hrVals,
+            hrConfidence,
+            rrVals,
+            rrConfidence,
             amplitude,
             apnea,
             baseline,
@@ -330,6 +389,10 @@ class ScreeningViewModel(
         val hrAverage: Double,
         val hrTrace: List<Pair<Float, Float>>?,
         val rrAverage: Double,
+        val rrVals: List<Pair<Float, Float>>?,
+        val rrConfidence: List<Pair<Float, Float>>?,
+        val hrVals: List<Pair<Float, Float>>?,
+        val hrConfidence: List<Pair<Float, Float>>?,
         val rrTrace: List<Pair<Float, Float>>?,
         val amplitude: List<Pair<Float, Float>>?,
         val apnea: List<Pair<Float,Boolean>>?,

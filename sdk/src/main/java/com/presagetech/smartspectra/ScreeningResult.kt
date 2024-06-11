@@ -14,6 +14,14 @@ sealed class ScreeningResult {
         // Breathing rate trace is a list sorted by time in seconds.
         val rrTrace: List<TraceEntry>?,
 
+        val rrVals: List<TraceEntry>?,
+
+        val rrConfidence: List<TraceEntry>?,
+
+        val hrVals: List<TraceEntry>?,
+
+        val hrConfidence: List<TraceEntry>?,
+
         val baseline: List<TraceEntry>?,
 
         val amplitude: List<TraceEntry>?,
@@ -42,6 +50,18 @@ sealed class ScreeningResult {
 
             require(baseline == null || baseline.isNotEmpty() && baseline.isSorted())
             baseline?.forEach { require(it.time.isFinite() && it.value.isFinite()) }
+
+            require(rrVals == null || rrVals.isNotEmpty() && rrVals.isSorted())
+            rrVals?.forEach { require(it.time.isFinite() && it.value.isFinite()) }
+
+            require(rrConfidence == null || rrConfidence.isNotEmpty() && rrConfidence.isSorted())
+            rrConfidence?.forEach { require(it.time.isFinite() && it.value.isFinite()) }
+
+            require(hrVals == null || hrVals.isNotEmpty() && hrVals.isSorted())
+            hrVals?.forEach { require(it.time.isFinite() && it.value.isFinite()) }
+
+            require(hrConfidence == null || hrConfidence.isNotEmpty() && hrConfidence.isSorted())
+            hrConfidence?.forEach { require(it.time.isFinite() && it.value.isFinite()) }
 
             require(amplitude == null || amplitude.isNotEmpty() && amplitude.isSorted())
             amplitude?.forEach { require(it.time.isFinite() && it.value.isFinite()) }
