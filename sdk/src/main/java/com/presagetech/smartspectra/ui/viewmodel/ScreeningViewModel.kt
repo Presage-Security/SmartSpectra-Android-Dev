@@ -4,7 +4,6 @@ import android.os.Parcelable
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.google.common.flogger.parameter.DateTimeFormat
 import com.presagetech.smartspectra.network.SDKApiService
 import com.presagetech.smartspectra.network.model.ETag
 import com.presagetech.smartspectra.ui.summary.UploadingState
@@ -12,7 +11,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
-import kotlinx.parcelize.RawValue
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -21,6 +19,8 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.lang.Integer.min
 import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.zip.GZIPOutputStream
 
@@ -210,7 +210,11 @@ class ScreeningViewModel(
     private fun parseRetrieveDataResponse(response: JSONObject): RetrievedData {
         val version = response.getString("version")
         val formatter = DateTimeFormatter.ofPattern("yyyyMMdd, HH:mm:ss")
-        val upload_date = LocalDateTime.parse(response.getString("upload_date"), formatter)
+        val raw_datetime = LocalDateTime.parse(response.getString("upload_date"), formatter)
+        val utcZone = ZoneId.of("UTC")
+        val localZone = ZoneId.systemDefault()
+        val utcZonedDateTime = ZonedDateTime.of(raw_datetime, utcZone)
+        val upload_date = utcZonedDateTime.withZoneSameInstant(localZone)
         val hrObject = response.getJSONObject("pulse").getJSONObject("hr")
         val hrAverage = parseFloatToValueArray(hrObject)
             .map { it.second }.average()
@@ -386,6 +390,8 @@ class ScreeningViewModel(
             version,
             upload_date
         )
+        Timber.i("UTC=${utcZonedDateTime}")
+        Timber.i("Local=${upload_date}")
         return result
     }
 
@@ -407,6 +413,6 @@ class ScreeningViewModel(
         val phasic: List<Pair<Float, Float>>?,
         val hrv: List<Pair<Float, Float>>?,
         val version: String,
-        val upload_date: LocalDateTime
+        val upload_date: ZonedDateTime
         ): Parcelable
 }

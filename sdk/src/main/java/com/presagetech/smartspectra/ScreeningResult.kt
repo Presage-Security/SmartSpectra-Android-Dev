@@ -2,7 +2,7 @@ package com.presagetech.smartspectra
 
 import com.presagetech.smartspectra.ui.viewmodel.ScreeningViewModel
 import org.json.JSONObject
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 
 sealed class ScreeningResult {
     data class Success(
@@ -42,7 +42,7 @@ sealed class ScreeningResult {
 
         val version: String,
 
-        val upload_date: LocalDateTime
+        val upload_date: ZonedDateTime
     ) : ScreeningResult() {
         init {
             // Ensure that double values are finite and non-negative.
