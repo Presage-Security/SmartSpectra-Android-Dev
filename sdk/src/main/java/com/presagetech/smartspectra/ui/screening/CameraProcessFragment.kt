@@ -26,6 +26,8 @@ import com.presagetech.smartspectra.R
 import com.presagetech.smartspectra.ui.SmartSpectraActivity
 import com.presagetech.smartspectra.ui.viewmodel.ScreeningViewModel
 import com.presagetech.smartspectra.utils.MyCameraXPreviewHelper
+import com.presage.physiology.proto.StatusProto
+import com.presage.physiology.Messages
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -34,7 +36,6 @@ import timber.log.Timber
 import java.io.File
 import java.io.FileWriter
 import java.io.IOException
-import java.util.*
 
 
 @ExperimentalCamera2Interop
@@ -63,7 +64,7 @@ class CameraProcessFragment : Fragment() {
     private val FLIP_FRAMES_VERTICALLY = true
 
     var timeLeft: Double = 100.0
-    @Volatile var error_msg: Int = 1
+    @Volatile var statusCode: StatusProto.StatusCode = StatusProto.StatusCode.PROCESSING_NOT_STARTED
     var cameraLockTimeout: Long = 0L  // based on
 
     // Converts the GL_TEXTURE_EXTERNAL_OES texture from Android camera into a regular texture to be
@@ -107,7 +108,7 @@ class CameraProcessFragment : Fragment() {
             it.setOnWillAddFrameListener(::handleOnWillAddFrame)
             it.addPacketCallback("time_left", ::handleTimeLeftPacket)
             it.addPacketCallback("json_data", ::handleJsonDataPacket)
-            it.addPacketCallback("error_code", ::handleErrorCodePacket)
+            it.addPacketCallback("status_code", ::handleStatusCodePacket)
         }
         this.processor = processor
 
@@ -150,19 +151,19 @@ class CameraProcessFragment : Fragment() {
     }
 
     private fun canRecord(): Boolean {
-        return error_msg == 0
+        return statusCode == StatusProto.StatusCode.OK
     }
 
     @Suppress("UNUSED_PARAMETER")
     private fun recordButtonClickListener(view: View) {
-        Timber.i("recordButtonClick: isRecording=$isRecording error_msg=$error_msg")
+        Timber.i("recordButtonClick: isRecording=$isRecording, status_code: $statusCode")
         if (isRecording) {
             resetTimer()
         } else {
             if (canRecord()) {
                 startTimer()
             } else {
-                Timber.d("Can't start recording, error code: $error_msg")
+                Timber.d("Can't start recording, status code: $statusCode")
             }
         }
     }
@@ -210,16 +211,14 @@ class CameraProcessFragment : Fragment() {
         (requireActivity() as SmartSpectraActivity).openUploadFragment()
     }
 
-    private fun handleErrorCodePacket(packet: Packet?) {
+    private fun handleStatusCodePacket(packet: Packet?) {
         if (packet == null) return
-        val newMsg = PacketGetter.getInt32(packet)
-        if (newMsg == error_msg) return
-        if (newMsg !in ErrorMessages.map.keys) {
-            throw IllegalStateException("Received unknown error code from graph: $newMsg")
-        }
-        error_msg = newMsg
+        val newStatusCodeMessage: StatusProto.StatusValue = PacketGetter.getProto(packet, StatusProto.StatusValue.parser())
+        val newStatusCode = newStatusCodeMessage.value
+        if (newStatusCode == statusCode) return
+        statusCode = newStatusCode
         hintText.post {
-            hintText.text = getString(ErrorMessages.map[error_msg]!!)
+            hintText.text = Messages.getStatusHint(statusCode)
         }
     }
 
