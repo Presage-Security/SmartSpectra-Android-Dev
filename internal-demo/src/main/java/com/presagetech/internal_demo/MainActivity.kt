@@ -28,7 +28,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var resultView: SmartSpectraResultView
     private lateinit var chartHr: LineChart
     private lateinit var chartRr: LineChart
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -56,13 +55,13 @@ class MainActivity : AppCompatActivity() {
     private val resultListener: SmartSpectraResultListener = SmartSpectraResultListener { result ->
         resultView.onResult(result) // pass the result to the view or handle it as needed
         // example usage of HR and RR pleth data (if present) to plot the pleth charts
-        if (result is ScreeningResult.Success && !result.hrTrace.isNullOrEmpty()) {
+        if (result is ScreeningResult.Success && !result.pulsePleth.isNullOrEmpty()) {
             chartHr.visibility = View.VISIBLE
-            dataPlotting(chartHr, result.hrTrace!!.map { Entry(it.time, it.value) })
+            dataPlotting(chartHr, result.pulsePleth!!.map { Entry(it.time, it.value) })
         }
-        if (result is ScreeningResult.Success && !result.rrTrace.isNullOrEmpty()) {
+        if (result is ScreeningResult.Success && !result.breathingPleth.isNullOrEmpty()) {
             chartRr.visibility = View.VISIBLE
-            dataPlotting(chartRr, result.rrTrace!!.map { Entry(it.time, it.value) })
+            dataPlotting(chartRr, result.breathingPleth!!.map { Entry(it.time, it.value) })
         }
     }
 

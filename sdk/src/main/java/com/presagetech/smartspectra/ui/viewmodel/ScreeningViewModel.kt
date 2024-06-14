@@ -34,8 +34,8 @@ class ScreeningViewModel(
     private val _uploadProgressLiveData = MutableLiveData<UploadingState>()
     val uploadProgressLiveData: LiveData<UploadingState> = _uploadProgressLiveData
 
-    private val _rrHRAveragePairLiveData = MutableLiveData<RetrievedData>()
-    val rrHRAveragePairLiveData: LiveData<RetrievedData> = _rrHRAveragePairLiveData
+    private val _rrstrictPulseRatePairLiveData = MutableLiveData<RetrievedData>()
+    val rrstrictPulseRatePairLiveData: LiveData<RetrievedData> = _rrstrictPulseRatePairLiveData
 
     fun setJsonData(json: String) {
         jsonData = json
@@ -118,7 +118,7 @@ class ScreeningViewModel(
         )
         Timber.d("onResponse: postComplete $output")
         val data = retrieveData(vidID)
-        _rrHRAveragePairLiveData.postValue(data)
+        _rrstrictPulseRatePairLiveData.postValue(data)
     }
 
     private fun completeHealthUpdateBody(
@@ -216,12 +216,12 @@ class ScreeningViewModel(
         val utcZonedDateTime = ZonedDateTime.of(raw_datetime, utcZone)
         val upload_date = utcZonedDateTime.withZoneSameInstant(localZone)
         val hrObject = response.getJSONObject("pulse").getJSONObject("hr")
-        val hrAverage = parseFloatToValueArray(hrObject)
+        val strictPulseRate = parseFloatToValueArray(hrObject)
             .map { it.second }.average()
             .let {
                 if (it.isFinite()) it else 0.0
             }
-        val hrTrace: List<Pair<Float, Float>>? = try {
+        val pulsePleth: List<Pair<Float, Float>>? = try {
             response
                 .getJSONObject("pulse")
                 .getJSONObject("hr_trace").let {
@@ -234,12 +234,12 @@ class ScreeningViewModel(
 
         val rrObject = response.getJSONObject("breath").getJSONObject("rr")
 
-        val rrAverage = parseFloatToValueArray(rrObject)
+        val strictBreathingRate = parseFloatToValueArray(rrObject)
             .map { it.second }.average()
             .let {
                 if (it.isFinite()) it else 0.0
             }
-        val rrTrace: List<Pair<Float, Float>>? = try {
+        val breathingPleth: List<Pair<Float, Float>>? = try {
             response
                 .getJSONObject("breath")
                 .getJSONObject("rr_trace").let {
@@ -250,7 +250,7 @@ class ScreeningViewModel(
             null
         }
 
-        val rrVals: List<Pair<Float, Float>>? = try {
+        val rrValues: List<Pair<Float, Float>>? = try {
             response
                 .getJSONObject("breath")
                 .getJSONObject("rr").let {
@@ -272,7 +272,7 @@ class ScreeningViewModel(
             null
         }
 
-        val hrVals: List<Pair<Float, Float>>? = try {
+        val hrValues: List<Pair<Float, Float>>? = try {
             response
                 .getJSONObject("pulse")
                 .getJSONObject("hr").let {
@@ -372,13 +372,13 @@ class ScreeningViewModel(
         }
 
         val result = RetrievedData(
-            hrAverage,
-            hrTrace,
-            rrAverage,
-            rrTrace,
-            hrVals,
+            strictPulseRate,
+            pulsePleth,
+            strictBreathingRate,
+            breathingPleth,
+            hrValues,
             hrConfidence,
-            rrVals,
+            rrValues,
             rrConfidence,
             amplitude,
             apnea,
@@ -397,13 +397,13 @@ class ScreeningViewModel(
 
     @Parcelize
     data class RetrievedData(
-        val hrAverage: Double,
-        val hrTrace: List<Pair<Float, Float>>?,
-        val rrAverage: Double,
-        val rrTrace: List<Pair<Float, Float>>?,
-        val hrVals: List<Pair<Float, Float>>?,
+        val strictPulseRate: Double,
+        val pulsePleth: List<Pair<Float, Float>>?,
+        val strictBreathingRate: Double,
+        val breathingPleth: List<Pair<Float, Float>>?,
+        val hrValues: List<Pair<Float, Float>>?,
         val hrConfidence: List<Pair<Float, Float>>?,
-        val rrVals: List<Pair<Float, Float>>?,
+        val rrValues: List<Pair<Float, Float>>?,
         val rrConfidence: List<Pair<Float, Float>>?,
         val amplitude: List<Pair<Float, Float>>?,
         val apnea: List<Pair<Float,Boolean>>?,

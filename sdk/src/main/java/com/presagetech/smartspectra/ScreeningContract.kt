@@ -27,13 +27,13 @@ class ScreeningContract : ActivityResultContract<ScreeningContractInput, Screeni
                 ?: throw IllegalArgumentException("Missing response")
 
             ScreeningResult.Success(
-                data.hrAverage,
-                data.hrTrace?.map { TraceEntry(it.first, it.second) },
-                data.rrAverage,
-                data.rrTrace?.map { TraceEntry(it.first, it.second) },
-                data.hrVals?.map { TraceEntry(it.first, it.second) },
+                data.strictPulseRate,
+                data.pulsePleth?.map { TraceEntry(it.first, it.second) },
+                data.strictBreathingRate,
+                data.breathingPleth?.map { TraceEntry(it.first, it.second) },
+                data.hrValues?.map { TraceEntry(it.first, it.second) },
                 data.hrConfidence?.map { TraceEntry(it.first, it.second) },
-                data.rrVals?.map { TraceEntry(it.first, it.second) },
+                data.rrValues?.map { TraceEntry(it.first, it.second) },
                 data.rrConfidence?.map { TraceEntry(it.first, it.second) },
                 data.amplitude?.map { TraceEntry(it.first, it.second) },
                 data.apnea?.map { ApneaEntry(it.first, it.second) },
