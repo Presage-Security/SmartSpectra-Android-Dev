@@ -23,3 +23,4 @@ The core measurement logic is implemented using Mediapipe.
 Graph definitions and TensorFlow Lite files are stored in `sdk/src/main/assets`. This allows for updates to the graph without needing to update the Mediapipe binaries.
 
 To update Mediapipe binaries, build mediapipe.aar and use the script `update_mediapipe_aar.sh path_to_new/mediapipe.aar`.
+
