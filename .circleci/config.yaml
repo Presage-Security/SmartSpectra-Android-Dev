@@ -19,6 +19,7 @@ jobs:
             git add sdk/build.gradle.kts
             git commit -m "Update Version [skip ci]"
             ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+            git pull
             git push
             echo $KEYSTORE | base64 -d > sdk/presagetech.gpg
             pwd
