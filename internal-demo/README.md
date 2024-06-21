@@ -66,6 +66,7 @@ You need a valid API key to authenticate your requests:
 ```kotlin
 smartSpectraButton.setApiKey("YOUR_API_KEY")
 ```
+You can obtain an API key from PresageTech's developer portal (https://physiology.presagetech.com/)
 
 ## Usage
 ### Example Code
