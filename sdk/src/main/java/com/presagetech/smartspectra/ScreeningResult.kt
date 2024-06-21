@@ -1,7 +1,5 @@
 package com.presagetech.smartspectra
 
-import com.presagetech.smartspectra.ui.viewmodel.ScreeningViewModel
-import org.json.JSONObject
 import java.time.ZonedDateTime
 
 sealed class ScreeningResult {
@@ -18,19 +16,19 @@ sealed class ScreeningResult {
         // Breathing rate trace is a list sorted by time in seconds.
         val breathingPleth: List<TraceEntry>?,
 
-        val hrValues: List<TraceEntry>?,
+        val pulseValues: List<TraceEntry>?,
 
-        val hrConfidence: List<TraceEntry>?,
+        val pulseConfidence: List<TraceEntry>?,
 
-        val rrValues: List<TraceEntry>?,
+        val breathingValues: List<TraceEntry>?,
 
-        val rrConfidence: List<TraceEntry>?,
+        val breathingConfidence: List<TraceEntry>?,
 
-        val amplitude: List<TraceEntry>?,
+        val breathingAmplitude: List<TraceEntry>?,
 
         val apnea: List<ApneaEntry>?,
 
-        val baseline: List<TraceEntry>?,
+        val breathingBaseline: List<TraceEntry>?,
 
         val ie: List<TraceEntry>?,
 
@@ -56,23 +54,23 @@ sealed class ScreeningResult {
             require(breathingPleth == null || breathingPleth.isNotEmpty() && breathingPleth.isSorted())
             breathingPleth?.forEach { require(it.time.isFinite() && it.value.isFinite()) }
 
-            require(baseline == null || baseline.isNotEmpty() && baseline.isSorted())
-            baseline?.forEach { require(it.time.isFinite() && it.value.isFinite()) }
+            require(breathingBaseline == null || breathingBaseline.isNotEmpty() && breathingBaseline.isSorted())
+            breathingBaseline?.forEach { require(it.time.isFinite() && it.value.isFinite()) }
 
-            require(rrValues == null || rrValues.isNotEmpty() && rrValues.isSorted())
-            rrValues?.forEach { require(it.time.isFinite() && it.value.isFinite()) }
+            require(breathingValues == null || breathingValues.isNotEmpty() && breathingValues.isSorted())
+            breathingValues?.forEach { require(it.time.isFinite() && it.value.isFinite()) }
 
-            require(rrConfidence == null || rrConfidence.isNotEmpty() && rrConfidence.isSorted())
-            rrConfidence?.forEach { require(it.time.isFinite() && it.value.isFinite()) }
+            require(breathingConfidence == null || breathingConfidence.isNotEmpty() && breathingConfidence.isSorted())
+            breathingConfidence?.forEach { require(it.time.isFinite() && it.value.isFinite()) }
 
-            require(hrValues == null || hrValues.isNotEmpty() && hrValues.isSorted())
-            hrValues?.forEach { require(it.time.isFinite() && it.value.isFinite()) }
+            require(pulseValues == null || pulseValues.isNotEmpty() && pulseValues.isSorted())
+            pulseValues?.forEach { require(it.time.isFinite() && it.value.isFinite()) }
 
-            require(hrConfidence == null || hrConfidence.isNotEmpty() && hrConfidence.isSorted())
-            hrConfidence?.forEach { require(it.time.isFinite() && it.value.isFinite()) }
+            require(pulseConfidence == null || pulseConfidence.isNotEmpty() && pulseConfidence.isSorted())
+            pulseConfidence?.forEach { require(it.time.isFinite() && it.value.isFinite()) }
 
-            require(amplitude == null || amplitude.isNotEmpty() && amplitude.isSorted())
-            amplitude?.forEach { require(it.time.isFinite() && it.value.isFinite()) }
+            require(breathingAmplitude == null || breathingAmplitude.isNotEmpty() && breathingAmplitude.isSorted())
+            breathingAmplitude?.forEach { require(it.time.isFinite() && it.value.isFinite()) }
 
             require(ie == null || ie.isNotEmpty() && ie.isSorted())
             ie?.forEach { require(it.time.isFinite() && it.value.isFinite()) }
