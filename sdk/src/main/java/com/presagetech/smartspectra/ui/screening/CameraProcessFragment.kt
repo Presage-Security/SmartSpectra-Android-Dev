@@ -43,8 +43,11 @@ class CameraProcessFragment : Fragment() {
     private val BINARY_GRAPH_NAME = "preprocessing_gpu_spot_json.binarypb"
     private val INPUT_VIDEO_STREAM_NAME = "input_video"
     private val SELECTED_INPUT_STREAM_NAME = "start_button_pre"
-    private val SPOT_DURATION_SIDE_PACKET_NAME = "spot_duration"
-    private val SPOT_DURATION_DEFAULT_VALUE = 30.0
+
+    private val SPOT_DURATION_SIDE_PACKET_NAME = "spot_duration_s"
+    private val SPOT_DURATION_DEFAULT_VALUE = 40.0
+
+    private val TIME_LEFT_STREAM_NAME = "time_left_s"
 
     private var isRecording: Boolean = false
     private var cameraHelper: MyCameraXPreviewHelper? = null
@@ -109,7 +112,7 @@ class CameraProcessFragment : Fragment() {
             it.videoSurfaceOutput.setFlipY(FLIP_FRAMES_VERTICALLY)
             it.setInputSidePackets(mapOf(SPOT_DURATION_SIDE_PACKET_NAME to it.packetCreator.createFloat64(SPOT_DURATION_DEFAULT_VALUE)))
             it.setOnWillAddFrameListener(::handleOnWillAddFrame)
-            it.addPacketCallback("time_left", ::handleTimeLeftPacket)
+            it.addPacketCallback(TIME_LEFT_STREAM_NAME, ::handleTimeLeftPacket)
             it.addPacketCallback("json_data", ::handleJsonDataPacket)
             it.addPacketCallback("status_code", ::handleStatusCodePacket)
         }
