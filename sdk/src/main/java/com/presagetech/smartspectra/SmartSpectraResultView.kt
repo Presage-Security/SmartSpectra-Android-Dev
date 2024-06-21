@@ -32,8 +32,8 @@ class SmartSpectraResultView(
     }
 
     private fun success(result: ScreeningResult.Success) {
-        val strictBreathingRate = result.rrAverage.roundToInt()
-        val strictPulseRate = result.hrAverage.roundToInt()
+        val strictBreathingRate = result.strictBreathingRate.roundToInt()
+        val strictPulseRate = result.strictPulseRate.roundToInt()
         descriptionTextView.text = context.getString(R.string.rr_hr_values,
             strictBreathingRate, strictPulseRate)
     }

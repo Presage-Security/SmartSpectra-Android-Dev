@@ -18,6 +18,10 @@ import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.lang.Integer.min
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import java.util.zip.GZIPOutputStream
 
 class ScreeningViewModel(
@@ -30,8 +34,8 @@ class ScreeningViewModel(
     private val _uploadProgressLiveData = MutableLiveData<UploadingState>()
     val uploadProgressLiveData: LiveData<UploadingState> = _uploadProgressLiveData
 
-    private val _rrHRAveragePairLiveData = MutableLiveData<RetrievedData>()
-    val rrHRAveragePairLiveData: LiveData<RetrievedData> = _rrHRAveragePairLiveData
+    private val _rrstrictPulseRatePairLiveData = MutableLiveData<RetrievedData>()
+    val rrstrictPulseRatePairLiveData: LiveData<RetrievedData> = _rrstrictPulseRatePairLiveData
 
     fun setJsonData(json: String) {
         jsonData = json
@@ -114,7 +118,7 @@ class ScreeningViewModel(
         )
         Timber.d("onResponse: postComplete $output")
         val data = retrieveData(vidID)
-        _rrHRAveragePairLiveData.postValue(data)
+        _rrstrictPulseRatePairLiveData.postValue(data)
     }
 
     private fun completeHealthUpdateBody(
@@ -182,14 +186,42 @@ class ScreeningViewModel(
         return result
     }
 
+    private fun parseFloatToConfidenceArray(json: JSONObject): List<Pair<Float, Float>> {
+        val result = ArrayList<Pair<Float, Float>>()
+        val keys = json.keys()
+        while (keys.hasNext()) {
+            val key = keys.next()
+            val value = json.getJSONObject(key).getDouble("confidence").toFloat()
+            result.add(Pair(key.toFloat(), value))
+        }
+        return result
+    }
+    private fun parseBoolToValueArray(json: JSONObject): List<Pair<Float, Boolean>> {
+        val result = ArrayList<Pair<Float, Boolean>>()
+        val keys = json.keys()
+        while (keys.hasNext()) {
+            val key = keys.next()
+            val value = json.getJSONObject(key).getBoolean("value")
+            result.add(Pair(key.toFloat(), value))
+        }
+        return result
+    }
+
     private fun parseRetrieveDataResponse(response: JSONObject): RetrievedData {
+        val version = response.getString("version")
+        val formatter = DateTimeFormatter.ofPattern("yyyyMMdd, HH:mm:ss")
+        val raw_datetime = LocalDateTime.parse(response.getString("upload_date"), formatter)
+        val utcZone = ZoneId.of("UTC")
+        val localZone = ZoneId.systemDefault()
+        val utcZonedDateTime = ZonedDateTime.of(raw_datetime, utcZone)
+        val upload_date = utcZonedDateTime.withZoneSameInstant(localZone)
         val hrObject = response.getJSONObject("pulse").getJSONObject("hr")
-        val hrAverage = parseFloatToValueArray(hrObject)
+        val strictPulseRate = parseFloatToValueArray(hrObject)
             .map { it.second }.average()
             .let {
                 if (it.isFinite()) it else 0.0
             }
-        val hrTrace: List<Pair<Float, Float>>? = try {
+        val pulsePleth: List<Pair<Float, Float>>? = try {
             response
                 .getJSONObject("pulse")
                 .getJSONObject("hr_trace").let {
@@ -201,12 +233,13 @@ class ScreeningViewModel(
         }
 
         val rrObject = response.getJSONObject("breath").getJSONObject("rr")
-        val rrAverage = parseFloatToValueArray(rrObject)
+
+        val strictBreathingRate = parseFloatToValueArray(rrObject)
             .map { it.second }.average()
             .let {
                 if (it.isFinite()) it else 0.0
             }
-        val rrTrace: List<Pair<Float, Float>>? = try {
+        val breathingPleth: List<Pair<Float, Float>>? = try {
             response
                 .getJSONObject("breath")
                 .getJSONObject("rr_trace").let {
@@ -217,21 +250,169 @@ class ScreeningViewModel(
             null
         }
 
+        val rrValues: List<Pair<Float, Float>>? = try {
+            response
+                .getJSONObject("breath")
+                .getJSONObject("rr").let {
+                    parseFloatToValueArray(it)
+                }.sortedBy { it.first }
+                .ifEmpty { null }
+        } catch (e: JSONException) {
+            null
+        }
+
+        val rrConfidence: List<Pair<Float, Float>>? = try {
+            response
+                .getJSONObject("breath")
+                .getJSONObject("rr").let {
+                    parseFloatToConfidenceArray(it)
+                }.sortedBy { it.first }
+                .ifEmpty { null }
+        } catch (e: JSONException) {
+            null
+        }
+
+        val hrValues: List<Pair<Float, Float>>? = try {
+            response
+                .getJSONObject("pulse")
+                .getJSONObject("hr").let {
+                    parseFloatToValueArray(it)
+                }.sortedBy { it.first }
+                .ifEmpty { null }
+        } catch (e: JSONException) {
+            null
+        }
+
+        val hrConfidence: List<Pair<Float, Float>>? = try {
+            response
+                .getJSONObject("pulse")
+                .getJSONObject("hr").let {
+                    parseFloatToConfidenceArray(it)
+                }.sortedBy { it.first }
+                .ifEmpty { null }
+        } catch (e: JSONException) {
+            null
+        }
+
+        val amplitude: List<Pair<Float, Float>>? = try {
+            response
+                .getJSONObject("breath")
+                .getJSONObject("amplitude").let {
+                    parseFloatToValueArray(it)
+                }.sortedBy { it.first }
+                .ifEmpty { null }
+        } catch (e: JSONException) {
+            null
+        }
+
+        val baseline: List<Pair<Float, Float>>? = try {
+            response
+                .getJSONObject("breath")
+                .getJSONObject("baseline").let {
+                    parseFloatToValueArray(it)
+                }.sortedBy { it.first }
+                .ifEmpty { null }
+        } catch (e: JSONException) {
+            null
+        }
+
+        val ie: List<Pair<Float, Float>>? = try {
+            response
+                .getJSONObject("breath")
+                .getJSONObject("ie").let {
+                    parseFloatToValueArray(it)
+                }.sortedBy { it.first }
+                .ifEmpty { null }
+        } catch (e: JSONException) {
+            null
+        }
+
+        val rrl: List<Pair<Float, Float>>? = try {
+            response
+                .getJSONObject("breath")
+                .getJSONObject("rrl").let {
+                    parseFloatToValueArray(it)
+                }.sortedBy { it.first }
+                .ifEmpty { null }
+        } catch (e: JSONException) {
+            null
+        }
+
+        val phasic: List<Pair<Float, Float>>? = try {
+            response
+                .getJSONObject("pressure")
+                .getJSONObject("phasic").let {
+                    parseFloatToValueArray(it)
+                }.sortedBy { it.first }
+                .ifEmpty { null }
+        } catch (e: JSONException) {
+            null
+        }
+
+        val hrv: List<Pair<Float, Float>>? = try {
+            response
+                .getJSONObject("pulse")
+                .getJSONObject("hrv").let {
+                    parseFloatToValueArray(it)
+                }.sortedBy { it.first }
+                .ifEmpty { null }
+        } catch (e: JSONException) {
+            null
+        }
+
+        val apnea: List<Pair<Float, Boolean>>? = try {
+            response
+                .getJSONObject("breath")
+                .getJSONObject("apnea").let {
+                    parseBoolToValueArray(it)
+                }.sortedBy { it.first }
+                .ifEmpty { null }
+        } catch (e: JSONException) {
+            null
+        }
+
         val result = RetrievedData(
-            hrAverage,
-            hrTrace,
-            rrAverage,
-            rrTrace,
+            strictPulseRate,
+            pulsePleth,
+            strictBreathingRate,
+            breathingPleth,
+            hrValues,
+            hrConfidence,
+            rrValues,
+            rrConfidence,
+            amplitude,
+            apnea,
+            baseline,
+            ie,
+            rrl,
+            phasic,
+            hrv,
+            version,
+            upload_date
         )
-        Timber.d("parseRetrieveDataResponse: $result")
+        Timber.i("UTC=${utcZonedDateTime}")
+        Timber.i("Local=${upload_date}")
         return result
     }
 
     @Parcelize
     data class RetrievedData(
-        val hrAverage: Double,
-        val hrTrace: List<Pair<Float, Float>>?,
-        val rrAverage: Double,
-        val rrTrace: List<Pair<Float, Float>>?,
-    ): Parcelable
+        val strictPulseRate: Double,
+        val pulsePleth: List<Pair<Float, Float>>?,
+        val strictBreathingRate: Double,
+        val breathingPleth: List<Pair<Float, Float>>?,
+        val hrValues: List<Pair<Float, Float>>?,
+        val hrConfidence: List<Pair<Float, Float>>?,
+        val rrValues: List<Pair<Float, Float>>?,
+        val rrConfidence: List<Pair<Float, Float>>?,
+        val amplitude: List<Pair<Float, Float>>?,
+        val apnea: List<Pair<Float,Boolean>>?,
+        val baseline: List<Pair<Float, Float>>?,
+        val ie: List<Pair<Float, Float>>?,
+        val rrl: List<Pair<Float, Float>>?,
+        val phasic: List<Pair<Float, Float>>?,
+        val hrv: List<Pair<Float, Float>>?,
+        val version: String,
+        val upload_date: ZonedDateTime
+        ): Parcelable
 }
