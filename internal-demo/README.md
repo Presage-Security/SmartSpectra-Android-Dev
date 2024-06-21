@@ -25,7 +25,7 @@ To integrate the SmartSpectra SDK into your Android project, add the following d
 
 ```gradle
 dependencies {
-    implementation 'com.presagetech:smartspectra:1.0.6'
+    implementation 'com.presagetech:smartspectra:1.0.8'
 }
 ```
 While the sdk library is in development process it may be necessary to add `maven(url = "https://s01.oss.sonatype.org/content/repositories/snapshots")`
@@ -102,9 +102,9 @@ The resultsListener contains the following objects:
 - `result.breathingBaseline` - ArrayList<>(time (double), value (double)) Breathing baseline
 - `result.phasic` - ArrayList<>(time (double), value (double)) Phasic (ie changes in relative blood pressure)
 - `result.rrl` - ArrayList<>(time (double), value (double)) Respiratory line length 
+- `result.ie` -  ArrayList<>(time (double), value (double)) The inhale exhale ratio 
 - `result.upload_date` - ZonedDateTime - upload date time
 - `result.version` - String - the version of API used
-- 
 
 
 
