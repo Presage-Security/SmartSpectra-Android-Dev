@@ -105,7 +105,7 @@ publishing {
             }
             groupId = "com.presagetech"
             artifactId = "smartspectra"
-	    version = "1.0.7-SNAPSHOT"
+	    version = "1.0.8-SNAPSHOT"
             pom {
                 name.set("Physiology SDK")
                 description.set("Heart and respiration rate measurement by Presage Technologies")
