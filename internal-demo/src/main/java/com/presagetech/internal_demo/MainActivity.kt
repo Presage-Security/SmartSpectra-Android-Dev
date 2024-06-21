@@ -53,7 +53,7 @@ class MainActivity : AppCompatActivity() {
 
     private val resultListener: SmartSpectraResultListener = SmartSpectraResultListener { result ->
         resultView.onResult(result) // pass the result to the view or handle it as needed
-        // example usage of HR and RR pleth data (if present) to plot the pleth charts
+        // example usage of pulse and breathing pleth data (if present) to plot the pleth charts
         if (result is ScreeningResult.Success && !result.pulsePleth.isNullOrEmpty()) {
             chartPulsePleth.visibility = View.VISIBLE
             dataPlotting(chartPulsePleth, result.pulsePleth!!.map { Entry(it.time, it.value) })
