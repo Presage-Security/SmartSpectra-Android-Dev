@@ -45,7 +45,7 @@ class CameraProcessFragment : Fragment() {
     private val SELECTED_INPUT_STREAM_NAME = "start_button_pre"
 
     private val SPOT_DURATION_SIDE_PACKET_NAME = "spot_duration_s"
-    private val SPOT_DURATION_DEFAULT_VALUE = 40.0
+    private val SPOT_DURATION_DEFAULT_VALUE = 30.0
 
     private val TIME_LEFT_STREAM_NAME = "time_left_s"
 
