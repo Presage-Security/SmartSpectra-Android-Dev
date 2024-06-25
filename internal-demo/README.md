@@ -89,9 +89,9 @@ private val resultListener: SmartSpectraResultListener = SmartSpectraResultListe
 ### Data Format
 The resultsListener contains the following objects:
 
--  `result.strictPulseRate` - (Double) the strict pulse rate (high confidence average over 30 seconds)
--  `result.strictBreathingRate` - (Double) the strict breathing rate (high confidence average over 30 seconds)
--  `result.pulseValues` - ArrayList<>(time (double), value (double)) Pulse rates 
+- `result.strictPulseRate` - (Double) the strict pulse rate (high confidence average over spot duration)
+- `result.strictBreathingRate` - (Double) the strict breathing rate (high confidence average over spot duration)
+- `result.pulseValues` - ArrayList<>(time (double), value (double)) Pulse rates 
 - `result.pulseConfidence` - ArrayList<>(time (double), value (double)) Pulse rate confidences
 - `result.pulsePleth` - ArrayList<>(time (double), value (double)) Pulse waveform or pleth 
 - `result.breathingValues` - ArrayList<>(time (double), value (double)) Breathing rates
