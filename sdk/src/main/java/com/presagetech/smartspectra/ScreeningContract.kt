@@ -19,34 +19,31 @@ class ScreeningContract : ActivityResultContract<ScreeningContractInput, Screeni
     }
 
     override fun parseResult(resultCode: Int, intent: Intent?): ScreeningResult {
-        return if (resultCode == Activity.RESULT_OK) {
-            requireNotNull(intent)
-            @Suppress("DEPRECATION")
-            val data = intent.getParcelableExtra(SmartSpectraActivity.RESULT_DATA_KEY)
-                    as? ScreeningViewModel.RetrievedData
-                ?: throw IllegalArgumentException("Missing response")
-
-            ScreeningResult.Success(
-                data.strictPulseRate,
-                data.pulsePleth?.map { TraceEntry(it.first, it.second) },
-                data.strictBreathingRate,
-                data.breathingPleth?.map { TraceEntry(it.first, it.second) },
-                data.pulseValues?.map { TraceEntry(it.first, it.second) },
-                data.pulseConfidence?.map { TraceEntry(it.first, it.second) },
-                data.breathingValues?.map { TraceEntry(it.first, it.second) },
-                data.breathingConfidence?.map { TraceEntry(it.first, it.second) },
-                data.breathingAmplitude?.map { TraceEntry(it.first, it.second) },
-                data.apnea?.map { ApneaEntry(it.first, it.second) },
-                data.breathingBaseline?.map { TraceEntry(it.first, it.second) },
-                data.ie?.map { TraceEntry(it.first, it.second) },
-                data.rrl?.map { TraceEntry(it.first, it.second) },
-                data.phasic?.map { TraceEntry(it.first, it.second) },
-                data.hrv?.map { TraceEntry(it.first, it.second) },
-                data.version,
-                data.upload_date
-                )
-        } else {
-            ScreeningResult.Failed
+         if (resultCode != Activity.RESULT_OK) {
+             return ScreeningResult.Failed
         }
+         val data = ScreeningViewModel.screeningResultHolder
+             ?: throw IllegalArgumentException("Missing response")
+        ScreeningViewModel.screeningResultHolder = null
+
+        return ScreeningResult.Success(
+            data.strictPulseRate,
+            data.pulsePleth?.map { TraceEntry(it.first, it.second) },
+            data.strictBreathingRate,
+            data.breathingPleth?.map { TraceEntry(it.first, it.second) },
+            data.pulseValues?.map { TraceEntry(it.first, it.second) },
+            data.pulseConfidence?.map { TraceEntry(it.first, it.second) },
+            data.breathingValues?.map { TraceEntry(it.first, it.second) },
+            data.breathingConfidence?.map { TraceEntry(it.first, it.second) },
+            data.breathingAmplitude?.map { TraceEntry(it.first, it.second) },
+            data.apnea?.map { ApneaEntry(it.first, it.second) },
+            data.breathingBaseline?.map { TraceEntry(it.first, it.second) },
+            data.ie?.map { TraceEntry(it.first, it.second) },
+            data.rrl?.map { TraceEntry(it.first, it.second) },
+            data.phasic?.map { TraceEntry(it.first, it.second) },
+            data.hrv?.map { TraceEntry(it.first, it.second) },
+            data.version,
+            data.upload_date
+        )
     }
 }

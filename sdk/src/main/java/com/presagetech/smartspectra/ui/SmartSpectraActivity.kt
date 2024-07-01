@@ -67,6 +67,5 @@ class SmartSpectraActivity : AppCompatActivity() {
 
     companion object {
         const val EXTRA_API_KEY = "apiKey"
-        const val RESULT_DATA_KEY = "apiResponse"
     }
 }
