@@ -6,7 +6,7 @@ This repository utilizes Git Large File Storage (LFS) for managing binary files 
 
 To use Git LFS:
 
-1. Ensure Git LFS is installed: `apt install git-lfs` _OR_ `brew install git-lfs`.
+1. Ensure Git LFS is installed [docs.github.com](https://docs.github.com/en/repositories/working-with-files/managing-large-files/installing-git-large-file-storage).
 2. Run `git lfs install`. This step is only required once after installation.
 3. If you've installed Git LFS after already cloning this repository, execute `git lfs pull`.
 Git LFS functions similarly to `.gitignore`. The configuration for files managed as LFS objects is in the `.gitattributes` file.

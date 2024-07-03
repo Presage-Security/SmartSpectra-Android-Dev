@@ -414,5 +414,9 @@ class ScreeningViewModel(
         val hrv: List<Pair<Float, Float>>?,
         val version: String,
         val upload_date: ZonedDateTime
-        ): Parcelable
+    ): Parcelable
+
+    companion object {
+        var screeningResultHolder: RetrievedData? = null
+    }
 }
