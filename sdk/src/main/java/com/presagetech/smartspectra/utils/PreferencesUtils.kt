@@ -4,6 +4,7 @@ import android.content.Context
 import com.presagetech.smartspectra.R
 
 object PreferencesUtils {
+    const val Onboarding_Tutorial_Key = "onboarding_tutorial_has_been_shown"
     const val Tutorial_Key = "tutorial_has_been_shown"
 
     fun saveBoolean(context: Context, key: String, boolean: Boolean) {

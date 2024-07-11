@@ -16,6 +16,7 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import androidx.core.view.doOnLayout
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.presagetech.smartspectra.ui.OnboardingTutorialActivity
 import com.presagetech.smartspectra.ui.WalkActivityParams
 import com.presagetech.smartspectra.ui.WalkThroughActivity
 import com.presagetech.smartspectra.utils.PreferencesUtils
@@ -29,19 +30,22 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
         R.id.txt_privacy_policy to "$BASE_URL/privacypolicy",
         R.id.txt_instruction_of_use to "$BASE_URL/instructions ",
         R.id.txt_contact_us to "$BASE_URL/contact",
-        R.id.txt_contact_us to "$BASE_URL/contact",
     )
 
     private var checkupButton: View
     private var infoButton: View
 
     private var tutorialHasBeenShown: Boolean
+    private var onboardingTutorialHasBeenShown: Boolean
+
     private var apiKey: String? = null
     private var resultListener: SmartSpectraResultListener? = null
 
     init {
         tutorialHasBeenShown =
             PreferencesUtils.getBoolean(context, PreferencesUtils.Tutorial_Key, false)
+        onboardingTutorialHasBeenShown =
+            PreferencesUtils.getBoolean(context, PreferencesUtils.Onboarding_Tutorial_Key, false)
         orientation = HORIZONTAL
         gravity = Gravity.CENTER_VERTICAL
         background = ContextCompat.getDrawable(context, R.drawable.smart_spectra_button_background)
@@ -74,13 +78,15 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
         }
         dialog.findViewById<AppCompatTextView>(R.id.show_tutorial)!!.setOnClickListener {
             dialog.dismiss()
-            openWalkThrough(context)
+            openOnboardingTutorial(context)
         }
         dialog
     }
 
     private fun showTutorialIfNecessary() {
-        if (!tutorialHasBeenShown) {
+        if (!PreferencesUtils.getBoolean(context, PreferencesUtils.Onboarding_Tutorial_Key, false)) {
+            openOnboardingTutorial(context)
+        } else if (!PreferencesUtils.getBoolean(context, PreferencesUtils.Tutorial_Key, false)) {
             openWalkThrough(context)
         }
     }
@@ -108,8 +114,16 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
         val intent = Intent(context, WalkThroughActivity::class.java).apply {
             putExtra(WalkThroughActivity.EXTRA_PARAMS, params)
         }
+
+
         context.startActivity(intent)
         tutorialHasBeenShown = true
+    }
+
+    private fun openOnboardingTutorial(context: Context) {
+        val intent = Intent(context, OnboardingTutorialActivity::class.java)
+        context.startActivity(intent)
+        onboardingTutorialHasBeenShown = true
     }
 
     private fun getViewLocation(view: View): Rect {
