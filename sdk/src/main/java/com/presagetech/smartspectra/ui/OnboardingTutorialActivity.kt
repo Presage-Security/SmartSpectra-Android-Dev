@@ -44,7 +44,7 @@ class OnboardingTutorialActivity : AppCompatActivity() {
                 updateTutorialStep()
             } else {
                 // Finish the tutorial and close the activity
-                PreferencesUtils.saveBoolean(this, PreferencesUtils.Onboarding_Tutorial_Key, true)
+                PreferencesUtils.saveBoolean(this, PreferencesUtils.ONBOARDING_TUTORIAL_KEY, true)
                 finish()
             }
         }
