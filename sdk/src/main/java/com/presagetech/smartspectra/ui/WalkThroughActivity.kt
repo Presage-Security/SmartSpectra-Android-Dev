@@ -127,7 +127,7 @@ class WalkThroughActivity : AppCompatActivity() {
             if (counter < maskedViews.size) {
                 setupMask(maskedViews[counter])
             } else {
-                PreferencesUtils.saveBoolean(this, PreferencesUtils.Tutorial_Key, true)
+                PreferencesUtils.saveBoolean(this, PreferencesUtils.TUTORIAL_KEY, true)
                 finish()
             }
         }

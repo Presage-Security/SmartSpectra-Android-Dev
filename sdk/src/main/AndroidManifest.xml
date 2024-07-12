@@ -11,6 +11,11 @@
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Transparent" />
         <activity
+            android:name=".ui.OnboardingTutorialActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Transparent" />
+        <activity
             android:name=".ui.SmartSpectraActivity"
             android:exported="false"
             android:screenOrientation="portrait"

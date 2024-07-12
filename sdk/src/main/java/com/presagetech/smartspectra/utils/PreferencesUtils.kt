@@ -4,24 +4,27 @@ import android.content.Context
 import com.presagetech.smartspectra.R
 
 object PreferencesUtils {
-    const val Tutorial_Key = "tutorial_has_been_shown"
+    const val AGREED_TO_TERMS_OF_SERVICE_KEY = "agreed_to_terms_of_service"
+    const val AGREED_TO_PRIVACY_POLICY_KEY = "agreed_to_privacy_policy"
+    const val ONBOARDING_TUTORIAL_KEY = "onboarding_tutorial_has_been_shown"
+    const val TUTORIAL_KEY = "tutorial_has_been_shown"
 
-    fun saveBoolean(context: Context, key: String, boolean: Boolean) {
-        val pref = context.getSharedPreferences(
+    fun saveBoolean(context: Context, key: String, value: Boolean) {
+        val sharedPreferences = context.getSharedPreferences(
             context.getString(R.string.shared_pref),
             Context.MODE_PRIVATE
         )
-        pref.edit().apply {
-            putBoolean(key, boolean)
+        sharedPreferences.edit().apply {
+            putBoolean(key, value)
             apply()
         }
     }
 
-    fun getBoolean(context: Context, key: String, default: Boolean): Boolean {
-        val pref = context.getSharedPreferences(
+    fun getBoolean(context: Context, key: String, defaultValue: Boolean): Boolean {
+        val sharedPreferences = context.getSharedPreferences(
             context.getString(R.string.shared_pref),
             Context.MODE_PRIVATE
         )
-        return pref.getBoolean(key, default)
+        return sharedPreferences.getBoolean(key, defaultValue)
     }
 }
