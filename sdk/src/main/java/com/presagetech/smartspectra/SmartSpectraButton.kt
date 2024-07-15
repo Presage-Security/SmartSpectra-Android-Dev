@@ -63,7 +63,6 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
         setOnClickListener(this::onStartClicked)
 
         infoButton = findViewById(R.id.button_info)
-        infoButton.doOnLayout { showTutorialIfNecessary() }
         infoButton.setOnClickListener { infoBottomSheetDialog.show() }
     }
 
@@ -136,7 +135,12 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
             "SDK API key is missing. Set via the .setApiKey() method."
         )
 
-        // ensure the agreement to terms of service
+        //show the tutorial when clicking checkup button in first launch
+        if(!onboardingTutorialHasBeenShown) {
+            showTutorialIfNecessary()
+        }
+
+        // ensure continued agreement to the terms of service and privacy policy
         showAgreementsIfNecessary()
 
         if(agreedToTermsOfService && agreedToPrivacyPolicy) {
@@ -162,6 +166,7 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
     private fun openOnboardingTutorial(context: Context, callback: (() -> Unit)? = null) {
         val intent = Intent(context, OnboardingTutorialActivity::class.java)
         context.startActivity(intent)
+        onboardingTutorialHasBeenShown = true
         PreferencesUtils.saveBoolean(context, PreferencesUtils.ONBOARDING_TUTORIAL_KEY, true)
         callback?.invoke()
     }
