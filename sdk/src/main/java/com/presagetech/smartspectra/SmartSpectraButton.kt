@@ -148,21 +148,6 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
         }
     }
 
-    private fun openWalkThrough(context: Context) {
-        val params = WalkActivityParams(
-            rootPosition = getViewLocation(this@SmartSpectraButton),
-            checkupPosition = getViewLocation(checkupButton),
-            infoPosition = getViewLocation(infoButton),
-        )
-        val intent = Intent(context, WalkThroughActivity::class.java).apply {
-            putExtra(WalkThroughActivity.EXTRA_PARAMS, params)
-        }
-
-
-        context.startActivity(intent)
-        tutorialHasBeenShown = true
-    }
-
     private fun openOnboardingTutorial(context: Context, callback: (() -> Unit)? = null) {
         val intent = Intent(context, OnboardingTutorialActivity::class.java)
         context.startActivity(intent)
