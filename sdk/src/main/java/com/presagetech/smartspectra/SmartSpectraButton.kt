@@ -3,7 +3,6 @@ package com.presagetech.smartspectra
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
-import android.graphics.Rect
 import android.net.Uri
 import android.util.AttributeSet
 import android.util.Log
@@ -21,8 +20,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.doOnLayout
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.presagetech.smartspectra.ui.OnboardingTutorialActivity
-import com.presagetech.smartspectra.ui.WalkActivityParams
-import com.presagetech.smartspectra.ui.WalkThroughActivity
 import com.presagetech.smartspectra.utils.PreferencesUtils
 import kotlin.math.roundToInt
 
@@ -39,7 +36,6 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
     private var checkupButton: View
     private var infoButton: View
 
-    private var tutorialHasBeenShown: Boolean
     private var onboardingTutorialHasBeenShown: Boolean
 
     private var agreedToTermsOfService: Boolean
@@ -50,8 +46,6 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
     private var resultListener: SmartSpectraResultListener? = null
 
     init {
-        tutorialHasBeenShown =
-            PreferencesUtils.getBoolean(context, PreferencesUtils.TUTORIAL_KEY, false)
         onboardingTutorialHasBeenShown =
             PreferencesUtils.getBoolean(context, PreferencesUtils.ONBOARDING_TUTORIAL_KEY, false)
 
@@ -170,14 +164,6 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
         context.startActivity(intent)
         PreferencesUtils.saveBoolean(context, PreferencesUtils.ONBOARDING_TUTORIAL_KEY, true)
         callback?.invoke()
-    }
-
-    private fun getViewLocation(view: View): Rect {
-        val location = IntArray(2)
-        view.getLocationOnScreen(location)
-        val x = location[0]
-        val y = location[1]
-        return Rect(x, y, x + view.width, y + view.height)
     }
 
     private fun openInWebView(url: String) {
