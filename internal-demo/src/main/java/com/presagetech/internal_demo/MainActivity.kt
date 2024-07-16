@@ -38,6 +38,8 @@ class MainActivity : AppCompatActivity() {
         chartBreathingPleth = findViewById(R.id.chart_breathingPleth)
 
         smartSpectraButton.setResultListener(resultListener)
+        // Valid range for spot time is between 20.0 and 120.0
+        smartSpectraButton.setSpotTime(30.0)
 
         // Your api token from https://physiology.presagetech.com/
         smartSpectraButton.setApiKey("YOUR_API_KEY")
