@@ -17,7 +17,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
-import androidx.core.view.doOnLayout
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.presagetech.smartspectra.ui.OnboardingTutorialActivity
 import com.presagetech.smartspectra.utils.PreferencesUtils
@@ -37,7 +36,6 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
     private var infoButton: View
 
     private var onboardingTutorialHasBeenShown: Boolean
-
     private var agreedToTermsOfService: Boolean
     private var agreedToPrivacyPolicy: Boolean
 
@@ -220,5 +218,9 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
     private fun dpToPx(dp: Int): Int {
         val density = context.resources.displayMetrics.density
         return (dp * density).roundToInt()
+    }
+
+    fun setSpotTime(spotDuration: Double) {
+        SmartSpectraSDKConfig.spotDuration = spotDuration
     }
 }

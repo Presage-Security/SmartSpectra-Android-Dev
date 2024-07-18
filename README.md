@@ -16,6 +16,7 @@ There are two main modules in this repository:
 
 * **internal-demo**: This is an app used for development and auto-tests. It should **not be confused** with the [public demo](https://github.com/Presage-Security/SmartSpectra-Android-App) repo intended for end users.
 * **sdk**: This module is published to Maven as a public library for end users.
+* **android app** [public demo](https://github.com/Presage-Security/SmartSpectra-Android-App).
 
 ## Mediapipe Integration
 The core measurement logic is implemented using Mediapipe.
