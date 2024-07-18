@@ -99,7 +99,7 @@ class TraceEntry(
 
 class ApneaEntry(
     val time: Float, // time in seconds
-    val value: Boolean, // heart rate value
+    val value: Boolean, // apnea detection value
 )
 
 private fun List<TraceEntry>.isSorted() = zipWithNext { a, b -> a.time <= b.time }.all { it }
