@@ -76,48 +76,55 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
         val dialog = BottomSheetDialog(context).also {
             it.setContentView(R.layout.info_bottom_sheet_layout)
         }
-        dialog.findViewById<AppCompatTextView>(R.id.txt_terms_of_service)!!.setOnClickListener {
+        dialog.findViewById<AppCompatTextView>(R.id.txt_terms_of_service)?.setOnClickListener {
             dialog.dismiss()
             showTermsOfService(context)
         }
-        dialog.findViewById<AppCompatTextView>(R.id.txt_privacy_policy)!!.setOnClickListener {
+        dialog.findViewById<AppCompatTextView>(R.id.txt_privacy_policy)?.setOnClickListener {
             dialog.dismiss()
             showPrivacyPolicy(context)
         }
-        dialog.findViewById<AppCompatTextView>(R.id.txt_instruction_of_use)!!.setOnClickListener {
+        dialog.findViewById<AppCompatTextView>(R.id.txt_instruction_of_use)?.setOnClickListener {
             dialog.dismiss()
             openInWebView(linksMap[R.id.txt_instruction_of_use].toString())
         }
-        dialog.findViewById<AppCompatTextView>(R.id.txt_contact_us)!!.setOnClickListener {
+        dialog.findViewById<AppCompatTextView>(R.id.txt_contact_us)?.setOnClickListener {
             dialog.dismiss()
             openInWebView(linksMap[R.id.txt_contact_us].toString())
         }
-        dialog.findViewById<AppCompatTextView>(R.id.show_tutorial)!!.setOnClickListener {
+        dialog.findViewById<AppCompatTextView>(R.id.show_tutorial)?.setOnClickListener {
             dialog.dismiss()
             openOnboardingTutorial(context)
         }
         dialog
     }
 
-    private fun showTutorialIfNecessary() {
+    private fun showTutorialIfNecessary(onComplete: (() -> Unit)? = null) {
         if (!onboardingTutorialHasBeenShown) {
             openOnboardingTutorial(context) {
-                showAgreementsIfNecessary()
+                showAgreementsIfNecessary(onComplete)
             }
+        } else {
+            onComplete?.invoke()
         }
     }
 
-    private fun showAgreementsIfNecessary() {
+    private fun showAgreementsIfNecessary(onComplete: (() -> Unit)? = null) {
         if(!agreedToTermsOfService) {
             //show terms of service
             showTermsOfService(context) { agreed ->
                 if (agreed) {
-                    showPrivacyPolicy(context)
+                    // call show agreement again to check for privacy policy
+                    showAgreementsIfNecessary(onComplete)
                 }
             }
         } else if(!agreedToPrivacyPolicy) {
             //show privacy policy
-            showPrivacyPolicy(context)
+            showPrivacyPolicy(context) {
+                onComplete?.invoke()
+            }
+        } else {
+            onComplete?.invoke()
         }
     }
 
@@ -133,16 +140,22 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
             "SDK API key is missing. Set via the .setApiKey() method."
         )
 
-        //show the tutorial when clicking checkup button in first launch
-        if(!onboardingTutorialHasBeenShown) {
-            showTutorialIfNecessary()
-        } else {
-            // ensure continued agreement to the terms of service and privacy policy
-            showAgreementsIfNecessary()
+        val postAgreementActions: () -> Unit = {
+            if(agreedToTermsOfService && agreedToPrivacyPolicy) {
+                screeningActivityLauncher.launch(ScreeningContractInput(key))
+            }
         }
 
-        if(agreedToTermsOfService && agreedToPrivacyPolicy) {
-            screeningActivityLauncher.launch(ScreeningContractInput(key))
+        //show the tutorial when clicking checkup button in first launch
+        if(!onboardingTutorialHasBeenShown) {
+            showTutorialIfNecessary {
+                postAgreementActions()
+            }
+        } else {
+            // ensure continued agreement to the terms of service and privacy policy
+            showAgreementsIfNecessary {
+                postAgreementActions()
+            }
         }
     }
 
