@@ -60,6 +60,9 @@ class MainActivity : AppCompatActivity() {
     private val resultListener: SmartSpectraResultListener = SmartSpectraResultListener { result ->
         resultView.onResult(result) // pass the result to the sdk's result view or handle it as needed
 
+        // Clear the chart container before plotting new results
+        chartContainer.removeAllViews()
+
         // Plot the results
         if (result is ScreeningResult.Success) {
             result.pulsePleth?.let {

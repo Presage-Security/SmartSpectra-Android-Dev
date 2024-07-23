@@ -44,7 +44,7 @@ dependencies {
     implementation("com.jakewharton.timber:timber:5.0.1")
 
      implementation(project(":sdk"))
-    // implementation("com.presagetech:smartspectra:1.0.0-SNAPSHOT")
+    // implementation("com.presagetech:smartspectra:1.0.9-SNAPSHOT")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
