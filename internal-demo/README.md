@@ -17,7 +17,7 @@ This app contained in this repo is an example of pulling and using the SmartSpec
 ## Prerequisites
 Before you start, ensure your development environment includes:
 - Android Studio Giraffe or later
-- Minimum SDK level 21
+- Minimum SDK level 26
 
 ## Installation
 To integrate the SmartSpectra SDK into your Android project, add the following dependency to your app's `build.gradle` file:

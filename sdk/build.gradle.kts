@@ -11,7 +11,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        minSdk = 21
+        minSdk = 26
 
         ndk {
             abiFilters.add("armeabi-v7a")
@@ -62,11 +62,11 @@ dependencies {
 
     implementation("com.jakewharton.timber:timber:5.0.1")
 
-    // https://developer.android.com/jetpack/androidx/releases/camera
-    implementation("androidx.camera:camera-core:1.3.0")
-    implementation("androidx.camera:camera-camera2:1.3.0")
-    implementation("androidx.camera:camera-lifecycle:1.3.0")
-    implementation("androidx.camera:camera-view:1.3.0")
+    val camerax_version = "1.3.4"
+    implementation("androidx.camera:camera-core:${camerax_version}")
+    implementation("androidx.camera:camera-camera2:${camerax_version}")
+    implementation("androidx.camera:camera-lifecycle:${camerax_version}")
+    implementation("androidx.camera:camera-view:${camerax_version}")
 
     // mediapipe dependencies
     implementation("com.google.flogger:flogger:0.3.1")

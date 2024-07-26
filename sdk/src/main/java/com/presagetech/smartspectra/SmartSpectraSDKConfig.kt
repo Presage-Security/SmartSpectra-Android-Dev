@@ -22,4 +22,6 @@ object SmartSpectraSDKConfig {
             }
             _spotDuration = value
         }
+
+    const val ENABLE_BP = false
 }
