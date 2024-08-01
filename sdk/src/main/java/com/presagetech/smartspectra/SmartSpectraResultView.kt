@@ -7,13 +7,12 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import kotlin.math.roundToInt
-import org.json.JSONObject
 
 class SmartSpectraResultView(
     context: Context,
     attrs: AttributeSet?
 ) : LinearLayout(context, attrs), SmartSpectraResultListener {
-    private var descriptionTextView: TextView
+    private var resultTextView: TextView
 
     init {
         orientation = VERTICAL
@@ -21,7 +20,7 @@ class SmartSpectraResultView(
             ContextCompat.getDrawable(context, R.drawable.smart_spectra_result_view_background)
 
         LayoutInflater.from(context).inflate(R.layout.view_result, this, true)
-        descriptionTextView = findViewById(R.id.tv_description)
+        resultTextView = findViewById(R.id.result_text)
     }
 
     override fun onResult(result: ScreeningResult) {
@@ -34,12 +33,17 @@ class SmartSpectraResultView(
     private fun success(result: ScreeningResult.Success) {
         val strictBreathingRate = result.strictBreathingRate.roundToInt()
         val strictPulseRate = result.strictPulseRate.roundToInt()
-        descriptionTextView.text = context.getString(R.string.rr_hr_values,
+
+        if (strictBreathingRate == 0 || strictPulseRate == 0) {
+            failed()
+            return
+        }
+        resultTextView.text = context.getString(R.string.result_label,
             strictBreathingRate, strictPulseRate)
     }
 
     private fun failed() {
-        descriptionTextView.setText(R.string.rr_hr_empty)
+        resultTextView.text = context.getString(R.string.measurement_failed_hint)
     }
 }
 

@@ -9,7 +9,7 @@ object PreferencesUtils {
     const val ONBOARDING_TUTORIAL_KEY = "onboarding_tutorial_has_been_shown"
 
     fun saveBoolean(context: Context, key: String, value: Boolean) {
-        val sharedPreferences = context.getSharedPreferences(
+        val sharedPreferences = context.applicationContext.getSharedPreferences(
             context.getString(R.string.shared_pref),
             Context.MODE_PRIVATE
         )
@@ -20,7 +20,7 @@ object PreferencesUtils {
     }
 
     fun getBoolean(context: Context, key: String, defaultValue: Boolean): Boolean {
-        val sharedPreferences = context.getSharedPreferences(
+        val sharedPreferences = context.applicationContext.getSharedPreferences(
             context.getString(R.string.shared_pref),
             Context.MODE_PRIVATE
         )
