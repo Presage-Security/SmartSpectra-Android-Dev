@@ -6,8 +6,6 @@
     <string name="uploading_failed_hint">Uploading failed, check your internet connection and retry</string>
     <string name="shared_pref">Smart_Spectra</string>
     <string name="checkup">CHECKUP</string>
-    <string name="checkup_description">This is checkup button</string>
-    <string name="info_description">This is info button</string>
     <string name="terms_of_services">Terms of service</string>
     <string name="instruction_of_use">Instruction of use</string>
     <string name="privacy_policy">Privacy policy</string>
