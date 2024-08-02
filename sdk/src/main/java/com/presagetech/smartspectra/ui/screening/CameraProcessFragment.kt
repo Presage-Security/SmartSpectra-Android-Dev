@@ -170,14 +170,14 @@ class CameraProcessFragment : Fragment() {
         cameraHelper?.toggleCameraControl(locked = true)
         cameraLockTimeout = SystemClock.elapsedRealtime() + CAMERA_LOCKING_TIMEOUT
         isRecording = true
-        recordingButton.text = getString(R.string.stop)
+        recordingButton.setText(R.string.stop)
     }
 
     private fun resetTimer() {
         cameraHelper?.toggleCameraControl(locked = false)
         cameraLockTimeout = 0L
         isRecording = false
-        recordingButton.text = getString(R.string.record)
+        recordingButton.setText(R.string.record)
     }
 
     private fun handleOnWillAddFrame(timestamp: Long) {
@@ -217,6 +217,17 @@ class CameraProcessFragment : Fragment() {
         statusCode = newStatusCode
         hintText.post {
             hintText.text = Messages.getStatusHint(statusCode)
+        }
+        recordingButton.post {
+            if (canRecord()) {
+                recordingButton.setBackgroundResource(R.drawable.record_background)
+                if(isRecording) {
+                    recordingButton.setText(R.string.stop)
+                }
+            } else {
+                recordingButton.setBackgroundResource(R.drawable.record_background_disabled)
+                recordingButton.setText(R.string.record)
+            }
         }
         packet.release()
     }
