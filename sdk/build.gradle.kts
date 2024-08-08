@@ -11,7 +11,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        minSdk = 21
+        minSdk = 26
 
         ndk {
             abiFilters.add("armeabi-v7a")
@@ -54,23 +54,23 @@ android {
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.10.0")
+    implementation("androidx.core:core-ktx:1.13.1")
+    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.4")
 
     implementation("com.jakewharton.timber:timber:5.0.1")
 
-    // https://developer.android.com/jetpack/androidx/releases/camera
-    implementation("androidx.camera:camera-core:1.3.0")
-    implementation("androidx.camera:camera-camera2:1.3.0")
-    implementation("androidx.camera:camera-lifecycle:1.3.0")
-    implementation("androidx.camera:camera-view:1.3.0")
+    val camerax_version = "1.3.4"
+    implementation("androidx.camera:camera-core:${camerax_version}")
+    implementation("androidx.camera:camera-camera2:${camerax_version}")
+    implementation("androidx.camera:camera-lifecycle:${camerax_version}")
+    implementation("androidx.camera:camera-view:${camerax_version}")
 
     // mediapipe dependencies
-    implementation("com.google.flogger:flogger:0.3.1")
-    implementation("com.google.flogger:flogger-system-backend:0.3.1")
+    implementation("com.google.flogger:flogger:0.6")
+    implementation("com.google.flogger:flogger-system-backend:0.6")
     implementation("com.google.code.findbugs:jsr305:3.0.2")
     implementation("com.google.guava:guava:27.0.1-android")
     implementation("com.google.protobuf:protobuf-java:3.19.3")
