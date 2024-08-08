@@ -26,7 +26,6 @@ import com.presagetech.smartspectra.ui.SmartSpectraActivity
 import com.presagetech.smartspectra.ui.viewmodel.ScreeningViewModel
 import com.presagetech.smartspectra.utils.MyCameraXPreviewHelper
 import timber.log.Timber
-import java.util.Locale
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -44,8 +43,6 @@ class CameraProcessFragment : Fragment() {
 
     private val TIME_LEFT_STREAM_NAME = "time_left_s"
 
-    private val FPS_STREAM_NAME = "fps"
-
     private var isRecording: Boolean = false
     private var cameraHelper: MyCameraXPreviewHelper? = null
 
@@ -55,6 +52,8 @@ class CameraProcessFragment : Fragment() {
     private lateinit var fpsTextView: TextView
     private lateinit var previewDisplayView: PreviewView  // frames processed by MediaPipe
     private lateinit var backgroundCameraHelper: ExecutorService
+
+    private val fpsTimestamps: ArrayDeque<Long> = ArrayDeque()
 
     // Initializes the mediapipe graph and provides access to the input/output streams
     private var eglManager: EglManager? = null
@@ -89,9 +88,7 @@ class CameraProcessFragment : Fragment() {
         backgroundCameraHelper = Executors.newSingleThreadExecutor()
 
         AndroidAssetUtil.initializeNativeAssetManager(requireContext())
-
         eglManager = EglManager(null)
-
         processor = FrameProcessor(
             requireContext(),
             eglManager!!.nativeContext,
@@ -100,13 +97,14 @@ class CameraProcessFragment : Fragment() {
             null,
         ).also {
             it.setVideoInputStreamCpu(INPUT_VIDEO_STREAM_NAME)
-            it.setInputSidePackets(mapOf(SPOT_DURATION_SIDE_PACKET_NAME to it.packetCreator.createFloat64(SmartSpectraSDKConfig.spotDuration)))
-            it.setInputSidePackets(mapOf(ENABLE_BP_SIDE_PACKET_NAME to it.packetCreator.createBool(SmartSpectraSDKConfig.ENABLE_BP)))
+            it.setInputSidePackets(mapOf(
+                SPOT_DURATION_SIDE_PACKET_NAME to it.packetCreator.createFloat64(SmartSpectraSDKConfig.spotDuration),
+                ENABLE_BP_SIDE_PACKET_NAME to it.packetCreator.createBool(SmartSpectraSDKConfig.ENABLE_BP)
+            ))
             it.setOnWillAddFrameListener(::handleOnWillAddFrame)
             it.addPacketCallback(TIME_LEFT_STREAM_NAME, ::handleTimeLeftPacket)
             it.addPacketCallback(OUTPUT_DATA_STREAM_NAME, ::handleJsonDataPacket)
             it.addPacketCallback(STATUS_CODE_STREAM_NAME, ::handleStatusCodePacket)
-            it.addPacketCallback(FPS_STREAM_NAME, ::handleFpsPacket)
             it.preheat()
         }
 
@@ -183,13 +181,11 @@ class CameraProcessFragment : Fragment() {
     private fun handleOnWillAddFrame(timestamp: Long) {
         val processor = processor ?: throw IllegalStateException()
         val value = isRecording && SystemClock.elapsedRealtime() > cameraLockTimeout
-        val selectedButtonPacket = processor.packetCreator.createBool(value)
         processor
             .graph
             .addPacketToInputStream(
-                SELECTED_INPUT_STREAM_NAME, selectedButtonPacket, timestamp
+                SELECTED_INPUT_STREAM_NAME, processor.packetCreator.createBool(value), timestamp
             )
-        selectedButtonPacket.release()
     }
 
     private fun handleTimeLeftPacket(packet: Packet?) {
@@ -213,33 +209,45 @@ class CameraProcessFragment : Fragment() {
         if (packet == null) return
         val newStatusCodeMessage: StatusProto.StatusValue = PacketGetter.getProto(packet, StatusProto.StatusValue.parser())
         val newStatusCode = newStatusCodeMessage.value
-        if (newStatusCode == statusCode) return
-        statusCode = newStatusCode
-        hintText.post {
-            hintText.text = Messages.getStatusHint(statusCode)
-        }
-        recordingButton.post {
-            if (canRecord()) {
-                recordingButton.setBackgroundResource(R.drawable.record_background)
-                if(isRecording) {
-                    recordingButton.setText(R.string.stop)
+
+        // Calculate and set FPS based on statusCode packet
+        calculateAndSetFPS(packet.timestamp)
+
+        if (newStatusCode != statusCode) {
+            statusCode = newStatusCode
+            hintText.post {
+                hintText.text = Messages.getStatusHint(statusCode)
+            }
+            recordingButton.post {
+                if (canRecord()) {
+                    recordingButton.setBackgroundResource(R.drawable.record_background)
+                    if(isRecording) {
+                        recordingButton.setText(R.string.stop)
+                    }
+                } else {
+                    recordingButton.setBackgroundResource(R.drawable.record_background_disabled)
+                    recordingButton.setText(R.string.record)
                 }
-            } else {
-                recordingButton.setBackgroundResource(R.drawable.record_background_disabled)
-                recordingButton.setText(R.string.record)
             }
         }
+
         packet.release()
     }
 
-    private fun handleFpsPacket(packet: Packet?) {
-        if (packet == null) return
-        val fps = PacketGetter.getFloat32(packet)
-        val fpsInt = fps.toInt()
-        fpsTextView.post {
-                fpsTextView.text = String.format(Locale.US, "FPS: %d", fpsInt)
+    private fun calculateAndSetFPS(timestamp: Long) {
+        fpsTimestamps.addLast(timestamp)
+        if (fpsTimestamps.size > 10) {
+            fpsTimestamps.removeFirst()
         }
-        packet.release()
+
+        if (fpsTimestamps.size > 1) {
+            val duration = timestamp - fpsTimestamps.first()
+            val fps = (1_000_000.0 * (fpsTimestamps.size - 1)) / duration  // Convert interval to FPS, since timestamp is in microseconds
+            val roundedFps = kotlin.math.round(fps).toInt()
+            fpsTextView.post {
+                fpsTextView.text = context?.getString(R.string.fps_label, roundedFps)
+            }
+        }
     }
 
     override fun onResume() {
