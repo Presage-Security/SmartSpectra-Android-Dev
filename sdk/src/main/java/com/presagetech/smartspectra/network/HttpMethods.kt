@@ -1,13 +1,13 @@
 package com.presagetech.smartspectra.network
 
 import java.io.*
-import java.lang.Math.min
 import java.net.URL
 import java.util.concurrent.TimeUnit
 import javax.net.ssl.HttpsURLConnection
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
+import kotlin.math.min
 
 object HttpMethods {
     suspend fun get(

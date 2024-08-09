@@ -28,6 +28,7 @@ import com.presagetech.smartspectra.utils.MyCameraXPreviewHelper
 import timber.log.Timber
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 
 @ExperimentalCamera2Interop
@@ -51,7 +52,7 @@ class CameraProcessFragment : Fragment() {
     private lateinit var recordingButton: AppCompatTextView
     private lateinit var fpsTextView: TextView
     private lateinit var previewDisplayView: PreviewView  // frames processed by MediaPipe
-    private lateinit var backgroundCameraHelper: ExecutorService
+    private lateinit var backgroundExecutor: ExecutorService
 
     private val fpsTimestamps: ArrayDeque<Long> = ArrayDeque()
 
@@ -85,7 +86,7 @@ class CameraProcessFragment : Fragment() {
         hintText.setText(R.string.loading_hint)
         recordingButton.setOnClickListener(::recordButtonClickListener)
         previewDisplayView.visibility = View.GONE
-        backgroundCameraHelper = Executors.newSingleThreadExecutor()
+        backgroundExecutor = Executors.newSingleThreadExecutor()
 
         AndroidAssetUtil.initializeNativeAssetManager(requireContext())
         eglManager = EglManager(null)
@@ -112,8 +113,7 @@ class CameraProcessFragment : Fragment() {
             (requireActivity() as AppCompatActivity).setSupportActionBar(it)
             it.setNavigationIcon(R.drawable.ic_arrow_back)
             it.setNavigationOnClickListener { _ ->
-                @Suppress("DEPRECATION")
-                requireActivity().onBackPressed()
+                requireActivity().onBackPressedDispatcher.onBackPressed()
             }
         }
 
@@ -268,14 +268,23 @@ class CameraProcessFragment : Fragment() {
         //release the resources
         cameraHelper?.onCameraImageProxyListener = null
         cameraHelper?.stopCamera()
-        processor?.waitUntilIdle()
-        processor?.close()
-        eglManager?.release()
+
+        backgroundExecutor.execute {
+            processor?.waitUntilIdle()
+            processor?.close()
+            eglManager?.release()
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         Timber.d("camera process fragment destroyed")
+
+        backgroundExecutor.shutdown()
+        backgroundExecutor.awaitTermination(
+            Long.MAX_VALUE,
+            TimeUnit.NANOSECONDS
+        )
     }
 
     private fun startCamera() {
@@ -286,7 +295,7 @@ class CameraProcessFragment : Fragment() {
                     requireActivity(),
                     viewLifecycleOwner,
                     previewDisplayView,
-                    backgroundCameraHelper
+                    backgroundExecutor
                 )
             }
         // show preview
@@ -302,9 +311,5 @@ class CameraProcessFragment : Fragment() {
 
     companion object {
         private const val CAMERA_LOCKING_TIMEOUT = 500L  // ms
-
-        init {
-            System.loadLibrary("mediapipe_jni")
-        }
     }
 }

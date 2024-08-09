@@ -236,4 +236,11 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
     fun setSpotTime(spotDuration: Double) {
         SmartSpectraSDKConfig.spotDuration = spotDuration
     }
+
+    companion object {
+        init {
+            System.loadLibrary("mediapipe_jni")
+            System.loadLibrary("opencv_java3")
+        }
+    }
 }

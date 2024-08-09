@@ -72,8 +72,8 @@ class MyCameraXPreviewHelper {
         val displayRotation = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             context.display!!.rotation
         } else {
-            @Suppress("DEPRECATION")
-            context.getSystemService(WindowManager::class.java).defaultDisplay.rotation
+            val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+            windowManager.defaultDisplay.rotation
         }
 
         val cameraSelector = CameraSelector.Builder()
