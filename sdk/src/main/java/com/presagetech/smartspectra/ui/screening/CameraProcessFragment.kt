@@ -3,7 +3,10 @@ package com.presagetech.smartspectra.ui.screening
 import android.content.Context
 import android.os.Bundle
 import android.os.SystemClock
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatTextView
@@ -86,6 +89,9 @@ class CameraProcessFragment : Fragment() {
         hintText.setText(R.string.loading_hint)
         recordingButton.setOnClickListener(::recordButtonClickListener)
         previewDisplayView.visibility = View.GONE
+        if (SmartSpectraSDKConfig.SHOW_FPS) {
+            fpsTextView.visibility = View.VISIBLE
+        }
         backgroundExecutor = Executors.newSingleThreadExecutor()
 
         AndroidAssetUtil.initializeNativeAssetManager(requireContext())
@@ -211,7 +217,9 @@ class CameraProcessFragment : Fragment() {
         val newStatusCode = newStatusCodeMessage.value
 
         // Calculate and set FPS based on statusCode packet
-        calculateAndSetFPS(packet.timestamp)
+        if (SmartSpectraSDKConfig.SHOW_FPS) {
+            calculateAndSetFPS(packet.timestamp)
+        }
 
         if (newStatusCode != statusCode) {
             statusCode = newStatusCode

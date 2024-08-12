@@ -237,6 +237,14 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
         SmartSpectraSDKConfig.spotDuration = spotDuration
     }
 
+    fun setSaveJson(saveJson: Boolean) {
+        SmartSpectraSDKConfig.SAVE_JSON = saveJson
+    }
+
+    fun setShowFps(showFps: Boolean) {
+        SmartSpectraSDKConfig.SHOW_FPS = showFps
+    }
+
     companion object {
         init {
             System.loadLibrary("mediapipe_jni")

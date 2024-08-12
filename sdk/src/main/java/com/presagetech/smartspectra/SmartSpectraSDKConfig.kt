@@ -3,7 +3,8 @@ package com.presagetech.smartspectra
 import timber.log.Timber
 
 object SmartSpectraSDKConfig {
-    const val SAVE_JSON = true
+    var SAVE_JSON = false
+    var SHOW_FPS = false
 
     // Spot duration
     private const val SPOT_DURATION_DEFAULT: Double = 30.0

@@ -112,6 +112,7 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
         android:layout_margin="16dp"
+        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@id/button_recording"
         app:layout_constraintEnd_toEndOf="@id/text_hint"/>
 

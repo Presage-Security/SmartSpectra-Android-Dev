@@ -20,10 +20,10 @@ import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 
 // SmartSpectra SDK Specific Imports
+import com.presagetech.smartspectra.ScreeningResult
 import com.presagetech.smartspectra.SmartSpectraButton
 import com.presagetech.smartspectra.SmartSpectraResultListener
 import com.presagetech.smartspectra.SmartSpectraResultView
-import com.presagetech.smartspectra.ScreeningResult
 import timber.log.Timber
 
 
@@ -43,7 +43,8 @@ class MainActivity : AppCompatActivity() {
 
         smartSpectraButton.setResultListener(resultListener)
         // Valid range for spot time is between 20.0 and 120.0
-        smartSpectraButton.setSpotTime(30.0)
+        smartSpectraButton.setSaveJson(false)
+        smartSpectraButton.setShowFps(false)
 
         // Your api token from https://physiology.presagetech.com/
         smartSpectraButton.setApiKey("YOUR_API_KEY")

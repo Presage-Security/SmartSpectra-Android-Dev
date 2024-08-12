@@ -74,6 +74,10 @@ smartSpectraButton.setApiKey("YOUR_API_KEY")
 // Set measurement duration (valid range for spot time is between 20.0 and 120.0)
 // Defaults to 30 if not specified otherwise
 smartSpectraButton.setSpotTime(30.0)
+// whether to save json at the end of measurements or not
+smartSpectraButton.setSaveJson(false)
+//whether to show fps in the previewDisplay
+smartSpectraButton.setShowFps(false)
 ```
 You can obtain an API key from PresageTech's developer portal (https://physiology.presagetech.com/)
 
