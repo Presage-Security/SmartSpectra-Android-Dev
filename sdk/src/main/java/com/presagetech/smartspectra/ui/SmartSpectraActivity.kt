@@ -60,7 +60,7 @@ class SmartSpectraActivity : AppCompatActivity() {
             .commit()
     }
 
-    companion object {
+    internal companion object {
         const val EXTRA_API_KEY = "apiKey"
     }
 }

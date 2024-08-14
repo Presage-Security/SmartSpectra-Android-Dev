@@ -317,7 +317,7 @@ class CameraProcessFragment : Fragment() {
         }
     }
 
-    companion object {
+    internal companion object {
         private const val CAMERA_LOCKING_TIMEOUT = 500L  // ms
     }
 }

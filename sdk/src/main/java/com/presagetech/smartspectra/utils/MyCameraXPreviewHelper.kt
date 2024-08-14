@@ -136,7 +136,7 @@ class MyCameraXPreviewHelper {
         Camera2CameraControl.from(cameraControl).captureRequestOptions = options
     }
 
-    companion object {
+    internal companion object {
         // Target frame and view resolution size in landscape.
         val TARGET_SIZE = Size(720,1280)
 

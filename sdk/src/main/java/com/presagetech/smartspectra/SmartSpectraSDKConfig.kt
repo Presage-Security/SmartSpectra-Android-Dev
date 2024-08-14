@@ -2,7 +2,7 @@ package com.presagetech.smartspectra
 
 import timber.log.Timber
 
-object SmartSpectraSDKConfig {
+internal object SmartSpectraSDKConfig {
     var SAVE_JSON = false
     var SHOW_FPS = false
 

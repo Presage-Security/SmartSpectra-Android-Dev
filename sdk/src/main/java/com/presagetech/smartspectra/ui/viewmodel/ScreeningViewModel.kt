@@ -449,7 +449,7 @@ class ScreeningViewModel(
         val upload_date: ZonedDateTime
     ): Parcelable
 
-    companion object {
+    internal companion object {
         var screeningResultHolder: RetrievedData? = null
     }
 }

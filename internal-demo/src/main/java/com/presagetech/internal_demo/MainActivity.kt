@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity() {
 
         smartSpectraButton.setResultListener(resultListener)
         // Valid range for spot time is between 20.0 and 120.0
-        smartSpectraButton.setSaveJson(false)
+        smartSpectraButton.setSpotTime(30.0)
         smartSpectraButton.setShowFps(false)
 
         // Your api token from https://physiology.presagetech.com/
