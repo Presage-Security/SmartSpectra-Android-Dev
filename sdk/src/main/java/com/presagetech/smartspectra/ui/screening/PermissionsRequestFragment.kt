@@ -8,14 +8,24 @@ import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import com.google.mediapipe.components.PermissionHelper
 import com.presagetech.smartspectra.R
 
 class PermissionsRequestFragment: Fragment() {
 
     private lateinit var requestButton: View
     private lateinit var settingsButton: View
+
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            toggleButtons(true)
+        } else {
+            toggleButtons(false)
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -43,25 +53,8 @@ class PermissionsRequestFragment: Fragment() {
         settingsButton.visibility = if (canRequest) View.GONE else View.VISIBLE
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        PermissionHelper.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (!PermissionHelper.cameraPermissionsGranted(requireActivity())) {
-            toggleButtons(false)
-            return
-        }
-    }
-
-    @Suppress("DEPRECATION")
     private fun requestPermissionDialog() {
-        requestPermissions( // this is better than modern way of requesting permissions
-            arrayOf(Manifest.permission.CAMERA),
-            1
-        )
+        requestPermissionLauncher.launch(Manifest.permission.CAMERA)
     }
 
     private fun openPermissionsSettings() {

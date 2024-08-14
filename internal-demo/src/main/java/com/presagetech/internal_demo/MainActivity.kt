@@ -20,10 +20,10 @@ import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 
 // SmartSpectra SDK Specific Imports
+import com.presagetech.smartspectra.ScreeningResult
 import com.presagetech.smartspectra.SmartSpectraButton
 import com.presagetech.smartspectra.SmartSpectraResultListener
 import com.presagetech.smartspectra.SmartSpectraResultView
-import com.presagetech.smartspectra.ScreeningResult
 import timber.log.Timber
 
 
@@ -44,6 +44,7 @@ class MainActivity : AppCompatActivity() {
         smartSpectraButton.setResultListener(resultListener)
         // Valid range for spot time is between 20.0 and 120.0
         smartSpectraButton.setSpotTime(30.0)
+        smartSpectraButton.setShowFps(false)
 
         // Your api token from https://physiology.presagetech.com/
         smartSpectraButton.setApiKey("YOUR_API_KEY")
@@ -72,20 +73,20 @@ class MainActivity : AppCompatActivity() {
                 addChart( it.map { Entry(it.time, it.value) }, "Breathing Pleth", false)
             }
             result.pulseValues?.let {
-                addChart( it.map { Entry(it.time, it.value) }, "Pulse Values", true)
+                addChart( it.map { Entry(it.time, it.value) }, "Pulse Rates", true)
             }
             result.pulseConfidence?.let {
-                addChart( it.map { Entry(it.time, it.value) }, "Pulse Confidence", true)
+                addChart( it.map { Entry(it.time, it.value) }, "Pulse Rate Confidence", true)
             }
             result.hrv?.let {
                 addChart( it.map { Entry(it.time, it.value) }, "Pulse Rate Variability", true)
             }
 
             result.breathingValues?.let {
-                addChart( it.map { Entry(it.time, it.value) }, "Breathing Values", true)
+                addChart( it.map { Entry(it.time, it.value) }, "Breathing Rates", true)
             }
             result.breathingConfidence?.let {
-                addChart( it.map { Entry(it.time, it.value) }, "Breathing Confidence", true)
+                addChart( it.map { Entry(it.time, it.value) }, "Breathing Rate Confidence", true)
             }
             result.breathingAmplitude?.let {
                 addChart( it.map { Entry(it.time, it.value) }, "Breathing Amplitude", true)

@@ -17,7 +17,7 @@ This app contained in this repo is an example of pulling and using the SmartSpec
 ## Prerequisites
 Before you start, ensure your development environment includes:
 - Android Studio Giraffe or later
-- Minimum SDK level 21
+- Minimum SDK level 26
 
 ## Installation
 To integrate the SmartSpectra SDK into your Android project, add the following dependency to your app's `build.gradle` file:
@@ -74,6 +74,8 @@ smartSpectraButton.setApiKey("YOUR_API_KEY")
 // Set measurement duration (valid range for spot time is between 20.0 and 120.0)
 // Defaults to 30 if not specified otherwise
 smartSpectraButton.setSpotTime(30.0)
+//whether to show fps in the previewDisplay
+smartSpectraButton.setShowFps(false)
 ```
 You can obtain an API key from PresageTech's developer portal (https://physiology.presagetech.com/)
 
@@ -134,7 +136,6 @@ You can obtain an API key from PresageTech's developer portal (https://physiolog
  
 For additional support, contact support@presagetech.com or submit a github issue (https://github.com/Presage-Security/SmartSpectra-Android-App/issues)
 
-## Known Bugs
+[//]: # (## Known Bugs)
 
-- Will sometimes crash on initial launch after accepting camera permissions
 

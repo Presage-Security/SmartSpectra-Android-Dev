@@ -1,9 +1,10 @@
 package com.presagetech.smartspectra
 
-import android.util.Log
+import timber.log.Timber
 
-object SmartSpectraSDKConfig {
-    const val SAVE_JSON = true
+internal object SmartSpectraSDKConfig {
+    var SAVE_JSON = false
+    var SHOW_FPS = false
 
     // Spot duration
     private const val SPOT_DURATION_DEFAULT: Double = 30.0
@@ -16,10 +17,11 @@ object SmartSpectraSDKConfig {
         get() = _spotDuration
         set(value) {
             if (value !in SPOT_DURATION_MIN..SPOT_DURATION_MAX) {
-                Log.w("SDKConfig", "Spot duration must be between $SPOT_DURATION_MIN and $SPOT_DURATION_MAX")
-                Log.w("SDKConfig", "Current Spot duration is set to: $_spotDuration")
+                Timber.w("Spot duration must be between $SPOT_DURATION_MIN and $SPOT_DURATION_MAX \nCurrent Spot duration is set to: $_spotDuration")
                 return
             }
             _spotDuration = value
         }
+
+    const val ENABLE_BP = false
 }

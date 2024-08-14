@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.AttributeSet
-import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -20,6 +19,7 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.presagetech.smartspectra.ui.OnboardingTutorialActivity
 import com.presagetech.smartspectra.utils.PreferencesUtils
+import timber.log.Timber
 import kotlin.math.roundToInt
 
 
@@ -177,7 +177,7 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
         showEulaDialog(context, linksMap[R.id.txt_terms_of_service].toString()) { agreed ->
             agreedToTermsOfService = agreed
             PreferencesUtils.saveBoolean(context, PreferencesUtils.AGREED_TO_TERMS_OF_SERVICE_KEY, agreed)
-            Log.d("EULA", "User agreed to terms of service: $agreed")
+            Timber.d("User agreed to terms of service: $agreed")
             if (!agreed) {
                 Toast.makeText(context, "You need to agree to Terms of Service before using our service.", Toast.LENGTH_LONG).show()
             }
@@ -189,7 +189,7 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
         showEulaDialog(context, linksMap[R.id.txt_privacy_policy].toString()) { agreed ->
             agreedToPrivacyPolicy = agreed
             PreferencesUtils.saveBoolean(context, PreferencesUtils.AGREED_TO_PRIVACY_POLICY_KEY, agreed)
-            Log.d("EULA", "User agreed to privacy policy: $agreed")
+            Timber.d("User agreed to privacy policy: $agreed")
             if (!agreed) {
                 Toast.makeText(context, "You need to agree to privacy policy before using our service.", Toast.LENGTH_LONG).show()
             }
@@ -207,13 +207,13 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
         webView.loadUrl(url)
 
         agreeButton.setOnClickListener {
-            Log.d("EULA", "Agreed to Terms")
+            Timber.d("Agreed to Terms")
             dialog.dismiss()
             callback?.invoke(true)
         }
 
         declineButton.setOnClickListener {
-            Log.d("EULA", "Not accepted")
+            Timber.d("Not accepted")
             dialog.dismiss()
             callback?.invoke(false)
         }
@@ -235,5 +235,16 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
 
     fun setSpotTime(spotDuration: Double) {
         SmartSpectraSDKConfig.spotDuration = spotDuration
+    }
+
+    fun setShowFps(showFps: Boolean) {
+        SmartSpectraSDKConfig.SHOW_FPS = showFps
+    }
+
+    internal companion object {
+        init {
+            System.loadLibrary("mediapipe_jni")
+            System.loadLibrary("opencv_java3")
+        }
     }
 }

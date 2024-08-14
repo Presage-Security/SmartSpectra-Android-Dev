@@ -1,8 +1,9 @@
 package com.presagetech.smartspectra.ui
 
-import android.annotation.SuppressLint
 import android.os.Bundle
+import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
+import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 import androidx.fragment.app.Fragment
 import com.google.mediapipe.components.PermissionHelper
 import com.presagetech.smartspectra.R
@@ -18,12 +19,9 @@ import timber.log.Timber
  * structure so we used navigation component to handle navigation between module Fragments.
  *
  * */
-@SuppressLint("UnsafeOptInUsageError")
 class SmartSpectraActivity : AppCompatActivity() {
 
     lateinit var viewModelFactory: ScreeningViewModelFactory
-
-    private var currentFragment: Fragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,22 +34,20 @@ class SmartSpectraActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        Timber.w("Resumed Smart Spectra Activity")
         val cameraPermissionGranted = PermissionHelper.cameraPermissionsGranted(this)
         if (cameraPermissionGranted) {
-            if (currentFragment is PermissionsRequestFragment) {
-                openCameraFragment()
-            }
+            openCameraFragment()
         } else {
-            if (currentFragment !is PermissionsRequestFragment) {
-                openPermissionsFragment()
-            }
+            openPermissionsFragment()
         }
     }
 
-    fun openPermissionsFragment() {
+    private fun openPermissionsFragment() {
         openFragment(PermissionsRequestFragment())
     }
-    fun openCameraFragment() {
+    @OptIn(ExperimentalCamera2Interop::class)
+    private fun openCameraFragment() {
         openFragment(CameraProcessFragment())
     }
     fun openUploadFragment() {
@@ -59,13 +55,12 @@ class SmartSpectraActivity : AppCompatActivity() {
     }
     private fun openFragment(fragment: Fragment) {
         Timber.i("Opening fragment: ${fragment::class.java.simpleName}")
-        supportFragmentManager.beginTransaction().replace(
-            R.id.host_fragment, fragment
-        ).commit()
-        currentFragment = fragment
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.host_fragment, fragment)
+            .commit()
     }
 
-    companion object {
+    internal companion object {
         const val EXTRA_API_KEY = "apiKey"
     }
 }
