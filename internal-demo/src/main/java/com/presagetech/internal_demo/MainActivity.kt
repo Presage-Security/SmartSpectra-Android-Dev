@@ -73,20 +73,20 @@ class MainActivity : AppCompatActivity() {
                 addChart( it.map { Entry(it.time, it.value) }, "Breathing Pleth", false)
             }
             result.pulseValues?.let {
-                addChart( it.map { Entry(it.time, it.value) }, "Pulse Values", true)
+                addChart( it.map { Entry(it.time, it.value) }, "Pulse Rates", true)
             }
             result.pulseConfidence?.let {
-                addChart( it.map { Entry(it.time, it.value) }, "Pulse Confidence", true)
+                addChart( it.map { Entry(it.time, it.value) }, "Pulse Rate Confidence", true)
             }
             result.hrv?.let {
                 addChart( it.map { Entry(it.time, it.value) }, "Pulse Rate Variability", true)
             }
 
             result.breathingValues?.let {
-                addChart( it.map { Entry(it.time, it.value) }, "Breathing Values", true)
+                addChart( it.map { Entry(it.time, it.value) }, "Breathing Rates", true)
             }
             result.breathingConfidence?.let {
-                addChart( it.map { Entry(it.time, it.value) }, "Breathing Confidence", true)
+                addChart( it.map { Entry(it.time, it.value) }, "Breathing Rate Confidence", true)
             }
             result.breathingAmplitude?.let {
                 addChart( it.map { Entry(it.time, it.value) }, "Breathing Amplitude", true)
