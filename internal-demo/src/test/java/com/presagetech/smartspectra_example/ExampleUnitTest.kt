@@ -1,4 +1,4 @@
-package com.presagetech.smartspectra_demo
+package com.presagetech.smartspectra_example
 
 import org.junit.Test
 

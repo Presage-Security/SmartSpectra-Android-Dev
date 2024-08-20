@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.presagetech.smartspectra_demo"
+    namespace = "com.presagetech.smartspectra_example"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.presagetech.smartspectra_demo"
+        applicationId = "com.presagetech.smartspectra_example"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
