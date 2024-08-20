@@ -83,7 +83,7 @@ You can obtain an API key from PresageTech's developer portal (https://physiolog
 
 ### Example Code
 
-Implement `SmartSpectraResultListener` in your MainActivity. Please refer to [MainActivity.kt](src/main/java/com/presagetech/internal_demo/MainActivity.kt) for example usage and plotting of a pulse and breathing pleth waveform. 
+Implement `SmartSpectraResultListener` in your MainActivity. Please refer to [MainActivity.kt](src/main/java/com/presagetech/smartspectra_demo/MainActivity.kt) for example usage and plotting of a pulse and breathing pleth waveform. 
 
 ```kotlin
 private val resultListener: SmartSpectraResultListener = SmartSpectraResultListener { result ->

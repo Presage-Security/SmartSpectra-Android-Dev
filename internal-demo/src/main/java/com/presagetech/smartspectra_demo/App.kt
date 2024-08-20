@@ -1,4 +1,4 @@
-package com.presagetech.internal_demo
+package com.presagetech.smartspectra_demo
 
 import android.app.Application
 import timber.log.Timber
