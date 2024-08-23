@@ -3,12 +3,10 @@ package com.presagetech.smartspectra_example
 
 import android.graphics.Color
 import android.graphics.Typeface
-import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
 // Plotting imports
@@ -48,14 +46,6 @@ class MainActivity : AppCompatActivity() {
 
         // Your api token from https://physiology.presagetech.com/
         smartSpectraButton.setApiKey("YOUR_API_KEY")
-
-        // In case of unsupported devices
-        if (!isSupportedAbi()) {
-            smartSpectraButton.isEnabled = false
-            Toast.makeText(this, "Unsupported device (ABI)", Toast.LENGTH_LONG).show()
-            Timber.d("Unsupported device (ABI)")
-            Timber.d("This device ABIs: ${Build.SUPPORTED_ABIS.contentToString()}")
-        }
     }
 
     private val resultListener: SmartSpectraResultListener = SmartSpectraResultListener { result ->
@@ -107,15 +97,6 @@ class MainActivity : AppCompatActivity() {
                 addChart( it.map { Entry(it.time, it.value) }, "IE", true)
             }
         }
-    }
-
-    private fun isSupportedAbi(): Boolean {
-        Build.SUPPORTED_ABIS.forEach {
-            if (it == "arm64-v8a" || it == "armeabi-v7a") {
-                return true
-            }
-        }
-        return false
     }
 
     private fun addChart(entries: List<Entry>, title: String, showYTicks: Boolean) {

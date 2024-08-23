@@ -4,6 +4,7 @@ import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -62,6 +63,14 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
 
         infoButton = findViewById(R.id.button_info)
         infoButton.setOnClickListener { infoBottomSheetDialog.show() }
+
+        // In case of unsupported devices
+        if (!isSupportedAbi()) {
+            isEnabled = false
+            Toast.makeText(context, "Unsupported device (ABI)", Toast.LENGTH_LONG).show()
+            Timber.d("Unsupported device (ABI)")
+            Timber.d("This device ABIs: ${Build.SUPPORTED_ABIS.contentToString()}")
+        }
     }
 
     fun setApiKey(apiKey: String) {
@@ -239,6 +248,16 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
 
     fun setShowFps(showFps: Boolean) {
         SmartSpectraSDKConfig.SHOW_FPS = showFps
+    }
+
+
+    private fun isSupportedAbi(): Boolean {
+        Build.SUPPORTED_ABIS.forEach {
+            if (it == "arm64-v8a" || it == "armeabi-v7a") {
+                return true
+            }
+        }
+        return false
     }
 
     internal companion object {
