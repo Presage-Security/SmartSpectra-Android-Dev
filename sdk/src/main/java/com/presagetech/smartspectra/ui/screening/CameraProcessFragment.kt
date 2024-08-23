@@ -37,15 +37,18 @@ import java.util.concurrent.TimeUnit
 @ExperimentalCamera2Interop
 class CameraProcessFragment : Fragment() {
     private val BINARY_GRAPH_NAME = "preprocessing_cpu_spot_json.binarypb"
+
+    // == input streams
     private val INPUT_VIDEO_STREAM_NAME = "input_video"
     private val SELECTED_INPUT_STREAM_NAME = "start_button_pre"
+    // == output streams
     private val OUTPUT_DATA_STREAM_NAME = "json_data"
     private val STATUS_CODE_STREAM_NAME = "status_code"
-
+    private val TIME_LEFT_STREAM_NAME = "time_left_s"
+    // == input side packets
     private val SPOT_DURATION_SIDE_PACKET_NAME = "spot_duration_s"
     private val ENABLE_BP_SIDE_PACKET_NAME = "enable_phasic_bp"
-
-    private val TIME_LEFT_STREAM_NAME = "time_left_s"
+    private val MODEL_DIRECTORY_SIDE_PACKET_NAME = "model_directory"
 
     private var isRecording: Boolean = false
     private var cameraHelper: MyCameraXPreviewHelper? = null
@@ -106,7 +109,8 @@ class CameraProcessFragment : Fragment() {
             it.setVideoInputStreamCpu(INPUT_VIDEO_STREAM_NAME)
             it.setInputSidePackets(mapOf(
                 SPOT_DURATION_SIDE_PACKET_NAME to it.packetCreator.createFloat64(SmartSpectraSDKConfig.spotDuration),
-                ENABLE_BP_SIDE_PACKET_NAME to it.packetCreator.createBool(SmartSpectraSDKConfig.ENABLE_BP)
+                ENABLE_BP_SIDE_PACKET_NAME to it.packetCreator.createBool(SmartSpectraSDKConfig.ENABLE_BP),
+                MODEL_DIRECTORY_SIDE_PACKET_NAME to it.packetCreator.createString(SmartSpectraSDKConfig.MODEL_DIRECTORY)
             ))
             it.setOnWillAddFrameListener(::handleOnWillAddFrame)
             it.addPacketCallback(TIME_LEFT_STREAM_NAME, ::handleTimeLeftPacket)
