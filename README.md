@@ -25,3 +25,11 @@ Graph definitions and TensorFlow Lite files are stored in `sdk/src/main/assets`.
 
 To update Mediapipe binaries, build mediapipe.aar and use the script `update_mediapipe_aar.sh path_to_new/mediapipe.aar`.
 
+### Troubleshooting
+
+If, after updating the framework, you encounter something like this:
+![GradleSyncError.png](media/GradleSyncError.png)
+
+OR the `R` value in `internal-demo/src/main/java/com/presagetech/smartspectra_example/MainActivity.kt` stops getting resolved by the AndroidStudio linter,
+
+Run `Sync Project With Gradle Files` (the little icon in the top right corner with left-down-pointing arrow and some animal, possibly an elephant).
