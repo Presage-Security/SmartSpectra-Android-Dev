@@ -2,6 +2,7 @@ package com.presagetech.smartspectra.ui.viewmodel
 
 import android.content.Context
 import android.os.Parcelable
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -45,6 +46,21 @@ class ScreeningViewModel(
 
     private val _rrstrictPulseRatePairLiveData = MutableLiveData<RetrievedData>()
     val rrstrictPulseRatePairLiveData: LiveData<RetrievedData> = _rrstrictPulseRatePairLiveData
+
+    private val _denseMeshPts = MutableLiveData<List<Pair<Int, Int>>>()
+    val denseMeshPts: LiveData<List<Pair<Int, Int>>> = _denseMeshPts
+
+    fun setDenseMeshPts(points: ShortArray) {
+        val unflattenedPoints = ArrayList<Pair<Int, Int>>(points.size / 2)
+        for (i in points.indices step 2) {
+            unflattenedPoints.add(Pair(points[i].toInt(), points[i + 1].toInt()))
+        }
+        _denseMeshPts.value = unflattenedPoints
+    }
+
+    fun observeDenseMeshPts(owner: LifecycleOwner, observer: (List<Pair<Int, Int>>) -> Unit) {
+        denseMeshPts.observe(owner, observer)
+    }
 
     fun setJsonData(context: Context, json: String) {
         jsonData = json

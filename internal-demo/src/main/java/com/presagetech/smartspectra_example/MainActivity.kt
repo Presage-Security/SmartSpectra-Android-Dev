@@ -46,6 +46,12 @@ class MainActivity : AppCompatActivity() {
 
         // Your api token from https://physiology.presagetech.com/
         smartSpectraButton.setApiKey("YOUR_API_KEY")
+
+        // for face mesh points
+        smartSpectraButton.setMeshPointsObserver { points ->
+            Timber.d("Observed mesh points: ${points.size}")
+            // TODO: Update UI or handle the points as needed
+        }
     }
 
     private val resultListener: SmartSpectraResultListener = SmartSpectraResultListener { result ->

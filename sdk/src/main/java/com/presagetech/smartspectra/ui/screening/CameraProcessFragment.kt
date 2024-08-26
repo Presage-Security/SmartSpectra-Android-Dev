@@ -45,6 +45,7 @@ class CameraProcessFragment : Fragment() {
     private val OUTPUT_DATA_STREAM_NAME = "json_data"
     private val STATUS_CODE_STREAM_NAME = "status_code"
     private val TIME_LEFT_STREAM_NAME = "time_left_s"
+    private val DENSE_MESH_PTS = "dense_facemesh_points"
     // == input side packets
     private val SPOT_DURATION_SIDE_PACKET_NAME = "spot_duration_s"
     private val ENABLE_BP_SIDE_PACKET_NAME = "enable_phasic_bp"
@@ -67,6 +68,7 @@ class CameraProcessFragment : Fragment() {
     private var processor: FrameProcessor? = null
 
     private var timeLeft: Double = 0.0
+    private lateinit var denseMeshPts: ShortArray
     @Volatile var statusCode: StatusProto.StatusCode = StatusProto.StatusCode.PROCESSING_NOT_STARTED
     private var cameraLockTimeout: Long = 0L
 
@@ -116,6 +118,7 @@ class CameraProcessFragment : Fragment() {
             it.addPacketCallback(TIME_LEFT_STREAM_NAME, ::handleTimeLeftPacket)
             it.addPacketCallback(OUTPUT_DATA_STREAM_NAME, ::handleJsonDataPacket)
             it.addPacketCallback(STATUS_CODE_STREAM_NAME, ::handleStatusCodePacket)
+            it.addPacketCallback(DENSE_MESH_PTS, ::handleDenseMeshPacket)
             it.preheat()
         }
 
@@ -204,6 +207,13 @@ class CameraProcessFragment : Fragment() {
         timerTextView.post {
             timerTextView.text = timeLeft.toInt().toString()
         }
+        packet.release()
+    }
+
+    private fun handleDenseMeshPacket(packet: Packet?) {
+        if (packet == null) return
+        denseMeshPts = PacketGetter.getInt16Vector(packet)
+        viewModel.setDenseMeshPts(denseMeshPts)
         packet.release()
     }
 

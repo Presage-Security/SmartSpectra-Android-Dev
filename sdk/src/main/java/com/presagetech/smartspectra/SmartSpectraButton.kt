@@ -17,8 +17,12 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.presagetech.smartspectra.ui.OnboardingTutorialActivity
+import com.presagetech.smartspectra.ui.viewmodel.ScreeningViewModel
 import com.presagetech.smartspectra.utils.PreferencesUtils
 import timber.log.Timber
 import kotlin.math.roundToInt
@@ -80,6 +84,18 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
     fun setResultListener(listener: SmartSpectraResultListener) {
         this.resultListener = listener
     }
+
+//    private val screeningViewModel: ScreeningViewModel by lazy {
+//        ViewModelProvider(context as ViewModelStoreOwner)[ScreeningViewModel::class.java]
+//    }
+//
+//    fun setMeshPointsObserver(observer: (List<Pair<Int, Int>>) -> Unit) {
+//        screeningViewModel.observeDenseMeshPts(context as LifecycleOwner, observer)
+//    }
+//    fun setMeshPointsObserver(observer: (List<Pair<Int, Int>>) -> Unit) {
+//        val screeningViewModel = ViewModelProvider(context as ViewModelStoreOwner)[ScreeningViewModel::class.java]
+//        screeningViewModel.observeDenseMeshPts(context as LifecycleOwner, observer)
+//    }
 
     private val infoBottomSheetDialog: BottomSheetDialog by lazy {
         val dialog = BottomSheetDialog(context).also {
