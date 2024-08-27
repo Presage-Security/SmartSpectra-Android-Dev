@@ -17,9 +17,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelStoreOwner
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.presagetech.smartspectra.ui.OnboardingTutorialActivity
 import com.presagetech.smartspectra.ui.viewmodel.ScreeningViewModel
@@ -47,6 +44,7 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
 
     private var apiKey: String? = null
     private var resultListener: SmartSpectraResultListener? = null
+    private lateinit var screeningViewModel: ScreeningViewModel
 
     init {
         onboardingTutorialHasBeenShown =
@@ -75,27 +73,23 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
             Timber.d("Unsupported device (ABI)")
             Timber.d("This device ABIs: ${Build.SUPPORTED_ABIS.contentToString()}")
         }
+
     }
 
     fun setApiKey(apiKey: String) {
         this.apiKey = apiKey
+        // Initialize the ViewModel with the new API key
+        ScreeningViewModel.initialize(apiKey)
+        screeningViewModel = ScreeningViewModel.getInstance()
     }
 
     fun setResultListener(listener: SmartSpectraResultListener) {
         this.resultListener = listener
     }
 
-//    private val screeningViewModel: ScreeningViewModel by lazy {
-//        ViewModelProvider(context as ViewModelStoreOwner)[ScreeningViewModel::class.java]
-//    }
-//
-//    fun setMeshPointsObserver(observer: (List<Pair<Int, Int>>) -> Unit) {
-//        screeningViewModel.observeDenseMeshPts(context as LifecycleOwner, observer)
-//    }
-//    fun setMeshPointsObserver(observer: (List<Pair<Int, Int>>) -> Unit) {
-//        val screeningViewModel = ViewModelProvider(context as ViewModelStoreOwner)[ScreeningViewModel::class.java]
-//        screeningViewModel.observeDenseMeshPts(context as LifecycleOwner, observer)
-//    }
+    fun setMeshPointsObserver(observer: (List<Pair<Int, Int>>) -> Unit) {
+        screeningViewModel.observeDenseMeshPts(observer)
+    }
 
     private val infoBottomSheetDialog: BottomSheetDialog by lazy {
         val dialog = BottomSheetDialog(context).also {
@@ -167,7 +161,7 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
 
         val postAgreementActions: () -> Unit = {
             if(agreedToTermsOfService && agreedToPrivacyPolicy) {
-                screeningActivityLauncher.launch(ScreeningContractInput(key))
+                screeningActivityLauncher.launch(ScreeningContractInput())
             }
         }
 

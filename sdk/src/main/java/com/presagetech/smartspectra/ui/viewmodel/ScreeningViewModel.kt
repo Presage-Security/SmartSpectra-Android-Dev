@@ -2,7 +2,6 @@ package com.presagetech.smartspectra.ui.viewmodel
 
 import android.content.Context
 import android.os.Parcelable
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -34,9 +33,10 @@ import java.util.Date
 import java.util.Locale
 import java.util.zip.GZIPOutputStream
 
-class ScreeningViewModel(
-    private val sdkApiService: SDKApiService
-) : ViewModel() {
+internal class ScreeningViewModel private constructor() : ViewModel() {
+    private lateinit var sdkApiService: SDKApiService
+    private lateinit var apiKey: String
+
     private val MAX_UPLOAD_SIZE = 5 * 1024 * 1024
 
     private var jsonData: String? = null
@@ -50,16 +50,28 @@ class ScreeningViewModel(
     private val _denseMeshPts = MutableLiveData<List<Pair<Int, Int>>>()
     val denseMeshPts: LiveData<List<Pair<Int, Int>>> = _denseMeshPts
 
+    private fun initialize(apiKey: String) {
+        this.apiKey = apiKey
+        this.sdkApiService = SDKApiService(apiKey)
+    }
+
+    fun getApiKey(): String {
+        if (!::apiKey.isInitialized) {
+            throw IllegalStateException("API key is not initialized")
+        }
+        return apiKey
+    }
+
     fun setDenseMeshPts(points: ShortArray) {
         val unflattenedPoints = ArrayList<Pair<Int, Int>>(points.size / 2)
         for (i in points.indices step 2) {
             unflattenedPoints.add(Pair(points[i].toInt(), points[i + 1].toInt()))
         }
-        _denseMeshPts.value = unflattenedPoints
+        _denseMeshPts.postValue(unflattenedPoints)
     }
 
-    fun observeDenseMeshPts(owner: LifecycleOwner, observer: (List<Pair<Int, Int>>) -> Unit) {
-        denseMeshPts.observe(owner, observer)
+    fun observeDenseMeshPts(observer: (List<Pair<Int, Int>>) -> Unit) {
+        denseMeshPts.observeForever(observer)
     }
 
     fun setJsonData(context: Context, json: String) {
@@ -443,6 +455,7 @@ class ScreeningViewModel(
         Timber.i("Local=${upload_date}")
         return result
     }
+    
 
     @Parcelize
     data class RetrievedData(
@@ -467,5 +480,21 @@ class ScreeningViewModel(
 
     internal companion object {
         var screeningResultHolder: RetrievedData? = null
+        @Volatile
+        private var INSTANCE: ScreeningViewModel? = null
+
+        fun initialize(apiKey: String) {
+            synchronized(this) {
+                if (INSTANCE == null) {
+                    INSTANCE = ScreeningViewModel().apply {
+                        initialize(apiKey)
+                    }
+                }
+            }
+        }
+
+        fun getInstance(): ScreeningViewModel {
+            return INSTANCE ?: throw IllegalStateException("ScreeningViewModel is not initialized. Call initialize(apiKey) first.")
+        }
     }
 }

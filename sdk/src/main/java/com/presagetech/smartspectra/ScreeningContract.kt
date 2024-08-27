@@ -7,15 +7,11 @@ import androidx.activity.result.contract.ActivityResultContract
 import com.presagetech.smartspectra.ui.SmartSpectraActivity
 import com.presagetech.smartspectra.ui.viewmodel.ScreeningViewModel
 
-class ScreeningContractInput(
-    val apiKey: String // Physiology SDK API key, find more https://physiology.presagetech.com/
-)
+class ScreeningContractInput()
 
 class ScreeningContract : ActivityResultContract<ScreeningContractInput, ScreeningResult>() {
     override fun createIntent(context: Context, input: ScreeningContractInput): Intent {
-        return Intent(context, SmartSpectraActivity::class.java).apply {
-            putExtra(SmartSpectraActivity.EXTRA_API_KEY, input.apiKey)
-        }
+        return Intent(context, SmartSpectraActivity::class.java)
     }
 
     override fun parseResult(resultCode: Int, intent: Intent?): ScreeningResult {

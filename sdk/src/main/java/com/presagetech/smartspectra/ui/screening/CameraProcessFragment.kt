@@ -14,7 +14,6 @@ import androidx.appcompat.widget.Toolbar
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 import androidx.camera.view.PreviewView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import com.google.mediapipe.components.FrameProcessor
 import com.google.mediapipe.components.PermissionHelper
 import com.google.mediapipe.framework.AndroidAssetUtil
@@ -50,6 +49,7 @@ class CameraProcessFragment : Fragment() {
     private val SPOT_DURATION_SIDE_PACKET_NAME = "spot_duration_s"
     private val ENABLE_BP_SIDE_PACKET_NAME = "enable_phasic_bp"
     private val MODEL_DIRECTORY_SIDE_PACKET_NAME = "model_directory"
+    private val API_KEY_SIDE_PACKET_NAME = "api_key"
 
     private var isRecording: Boolean = false
     private var cameraHelper: MyCameraXPreviewHelper? = null
@@ -73,10 +73,7 @@ class CameraProcessFragment : Fragment() {
     private var cameraLockTimeout: Long = 0L
 
     private val viewModel: ScreeningViewModel by lazy {
-        ViewModelProvider(
-            requireActivity(),
-            (requireActivity() as SmartSpectraActivity).viewModelFactory
-        )[ScreeningViewModel::class.java]
+        ScreeningViewModel.getInstance()
     }
 
     override fun onCreateView(
@@ -112,7 +109,8 @@ class CameraProcessFragment : Fragment() {
             it.setInputSidePackets(mapOf(
                 SPOT_DURATION_SIDE_PACKET_NAME to it.packetCreator.createFloat64(SmartSpectraSDKConfig.spotDuration),
                 ENABLE_BP_SIDE_PACKET_NAME to it.packetCreator.createBool(SmartSpectraSDKConfig.ENABLE_BP),
-                MODEL_DIRECTORY_SIDE_PACKET_NAME to it.packetCreator.createString(SmartSpectraSDKConfig.MODEL_DIRECTORY)
+                MODEL_DIRECTORY_SIDE_PACKET_NAME to it.packetCreator.createString(SmartSpectraSDKConfig.MODEL_DIRECTORY),
+                API_KEY_SIDE_PACKET_NAME to it.packetCreator.createString(viewModel.getApiKey()),
             ))
             it.setOnWillAddFrameListener(::handleOnWillAddFrame)
             it.addPacketCallback(TIME_LEFT_STREAM_NAME, ::handleTimeLeftPacket)
