@@ -69,9 +69,14 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
         // In case of unsupported devices
         if (!isSupportedAbi()) {
             isEnabled = false
+            checkupButton.isEnabled = false
             Toast.makeText(context, "Unsupported device (ABI)", Toast.LENGTH_LONG).show()
             Timber.d("Unsupported device (ABI)")
             Timber.d("This device ABIs: ${Build.SUPPORTED_ABIS.contentToString()}")
+        } else {
+            // Load necessary libraries
+            System.loadLibrary("mediapipe_jni")
+            System.loadLibrary("opencv_java3")
         }
 
     }
@@ -260,7 +265,6 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
         SmartSpectraSDKConfig.SHOW_FPS = showFps
     }
 
-
     private fun isSupportedAbi(): Boolean {
         Build.SUPPORTED_ABIS.forEach {
             if (it == "arm64-v8a" || it == "armeabi-v7a") {
@@ -268,12 +272,5 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
             }
         }
         return false
-    }
-
-    internal companion object {
-        init {
-            System.loadLibrary("mediapipe_jni")
-            System.loadLibrary("opencv_java3")
-        }
     }
 }
