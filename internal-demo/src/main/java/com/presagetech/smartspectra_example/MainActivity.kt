@@ -67,9 +67,14 @@ class MainActivity : AppCompatActivity() {
         val chart = faceMeshContainer
         chart.isVisible = true
 
-        // Scale the points by dividing with 720 and sort by x
-        val scaledPoints = meshPoints.map { Entry(it.first / 720f, it.second / 720f) }
-            .sortedBy { it.x } // Unsorted points cause negative array size exception
+
+        // Scale the points and sort by x
+        // Sorting is important here for scatter plot as unsorted points cause negative array size exception in scatter chart
+        // See https://github.com/PhilJay/MPAndroidChart/issues/2074#issuecomment-239936758
+        // --- Important --- we are subtracting the y points for plotting since (0,0) is top-left on the screen but bottom-left on the chart
+        // --- Important --- we are subtracting the x points to mirror horizontally
+        val scaledPoints = meshPoints.map { Entry(1f - it.first / 720f, 1f - it.second / 720f) }
+            .sortedBy { it.x }
 
         // Create a dataset and add the scaled points
         val dataSet = ScatterDataSet(scaledPoints, "Mesh Points").apply {
