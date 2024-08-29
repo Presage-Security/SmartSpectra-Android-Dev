@@ -10,12 +10,16 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
 // Plotting imports
+import androidx.core.view.isVisible
 import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.charts.ScatterChart
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.data.ScatterData
+import com.github.mikephil.charting.data.ScatterDataSet
 
 // SmartSpectra SDK Specific Imports
 import com.presagetech.smartspectra.ScreeningResult
@@ -29,6 +33,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var smartSpectraButton: SmartSpectraButton
     private lateinit var resultView: SmartSpectraResultView
     private lateinit var chartContainer: LinearLayout
+    private lateinit var faceMeshContainer: ScatterChart
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,6 +43,7 @@ class MainActivity : AppCompatActivity() {
         smartSpectraButton = findViewById(R.id.btn)
         resultView = findViewById(R.id.result_view)
         chartContainer = findViewById(R.id.chart_container)
+        faceMeshContainer = findViewById(R.id.mesh_container)
 
         smartSpectraButton.setResultListener(resultListener)
         // Valid range for spot time is between 20.0 and 120.0
@@ -53,9 +59,49 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun handleMeshPoints (meshPoints: List<Pair<Int, Int>>) {
+    private fun handleMeshPoints(meshPoints: List<Pair<Int, Int>>) {
         Timber.d("Observed mesh points: ${meshPoints.size}")
         // TODO: Update UI or handle the points as needed
+
+        // Reference the ScatterChart from the layout
+        val chart = faceMeshContainer
+        chart.isVisible = true
+
+        // Scale the points by dividing with 720 and sort by x
+        val scaledPoints = meshPoints.map { Entry(it.first / 720f, it.second / 720f) }
+            .sortedBy { it.x } // Unsorted points cause negative array size exception
+
+        // Create a dataset and add the scaled points
+        val dataSet = ScatterDataSet(scaledPoints, "Mesh Points").apply {
+            setDrawValues(false)
+            scatterShapeSize = 15f
+            setScatterShape(ScatterChart.ScatterShape.CIRCLE)
+        }
+
+        // Create ScatterData with the dataset
+        val scatterData = ScatterData(dataSet)
+
+        // Customize the chart
+        chart.apply {
+            data = scatterData
+            axisLeft.isEnabled = false
+            axisRight.isEnabled = false
+            xAxis.isEnabled = false
+            setTouchEnabled(false)
+            description.isEnabled = false
+            legend.isEnabled = false
+
+            // Set visible range to make x and y axis have the same range
+
+            setVisibleXRange(0f, 1f)
+            setVisibleYRange(0f, 1f, YAxis.AxisDependency.LEFT)
+
+            // Move view to the data
+            moveViewTo(0f, 0f, YAxis.AxisDependency.LEFT)
+        }
+
+        // Refresh the chart
+        chart.invalidate()
     }
 
     private val resultListener: SmartSpectraResultListener = SmartSpectraResultListener { result ->
