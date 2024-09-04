@@ -47,8 +47,8 @@ internal class ScreeningViewModel private constructor() : ViewModel() {
     private val _rrstrictPulseRatePairLiveData = MutableLiveData<RetrievedData>()
     val rrstrictPulseRatePairLiveData: LiveData<RetrievedData> = _rrstrictPulseRatePairLiveData
 
-    private val _denseMeshPts = MutableLiveData<List<Pair<Int, Int>>>()
-    val denseMeshPts: LiveData<List<Pair<Int, Int>>> = _denseMeshPts
+    private val _denseMeshPoints = MutableLiveData<List<Pair<Int, Int>>>()
+    val denseMeshPoints: LiveData<List<Pair<Int, Int>>> = _denseMeshPoints
 
     private fun initialize(apiKey: String) {
         this.apiKey = apiKey
@@ -62,16 +62,16 @@ internal class ScreeningViewModel private constructor() : ViewModel() {
         return apiKey
     }
 
-    fun setDenseMeshPts(points: ShortArray) {
+    fun setDenseMeshPoints(points: ShortArray) {
         val unflattenedPoints = ArrayList<Pair<Int, Int>>(points.size / 2)
         for (i in points.indices step 2) {
             unflattenedPoints.add(Pair(points[i].toInt(), points[i + 1].toInt()))
         }
-        _denseMeshPts.postValue(unflattenedPoints)
+        _denseMeshPoints.postValue(unflattenedPoints)
     }
 
-    fun observeDenseMeshPts(observer: (List<Pair<Int, Int>>) -> Unit) {
-        denseMeshPts.observeForever(observer)
+    fun observeDenseMeshPoints(observer: (List<Pair<Int, Int>>) -> Unit) {
+        denseMeshPoints.observeForever(observer)
     }
 
     fun setJsonData(context: Context, json: String) {

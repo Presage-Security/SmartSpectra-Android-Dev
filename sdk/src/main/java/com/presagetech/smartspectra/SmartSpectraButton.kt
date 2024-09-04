@@ -93,7 +93,7 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
     }
 
     fun setMeshPointsObserver(observer: (List<Pair<Int, Int>>) -> Unit) {
-        screeningViewModel.observeDenseMeshPts(observer)
+        screeningViewModel.observeDenseMeshPoints(observer)
     }
 
     private val infoBottomSheetDialog: BottomSheetDialog by lazy {
