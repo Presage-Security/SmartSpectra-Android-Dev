@@ -7,11 +7,9 @@ import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 import androidx.fragment.app.Fragment
 import com.google.mediapipe.components.PermissionHelper
 import com.presagetech.smartspectra.R
-import com.presagetech.smartspectra.network.SDKApiService
 import com.presagetech.smartspectra.ui.screening.CameraProcessFragment
 import com.presagetech.smartspectra.ui.screening.PermissionsRequestFragment
 import com.presagetech.smartspectra.ui.summary.UploadingFragment
-import com.presagetech.smartspectra.ui.viewmodel.ScreeningViewModelFactory
 import timber.log.Timber
 
 /**
@@ -21,13 +19,8 @@ import timber.log.Timber
  * */
 class SmartSpectraActivity : AppCompatActivity() {
 
-    lateinit var viewModelFactory: ScreeningViewModelFactory
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val apiKey = intent.getStringExtra(EXTRA_API_KEY) ?: throw IllegalArgumentException("API key is missing")
-        viewModelFactory = ScreeningViewModelFactory(SDKApiService(apiKey))
-
         setContentView(R.layout.activity_main_layout_nav)
         openPermissionsFragment()
     }
@@ -46,21 +39,20 @@ class SmartSpectraActivity : AppCompatActivity() {
     private fun openPermissionsFragment() {
         openFragment(PermissionsRequestFragment())
     }
+
     @OptIn(ExperimentalCamera2Interop::class)
     private fun openCameraFragment() {
         openFragment(CameraProcessFragment())
     }
+
     fun openUploadFragment() {
         openFragment(UploadingFragment())
     }
+
     private fun openFragment(fragment: Fragment) {
         Timber.i("Opening fragment: ${fragment::class.java.simpleName}")
         supportFragmentManager.beginTransaction()
             .replace(R.id.host_fragment, fragment)
             .commit()
-    }
-
-    internal companion object {
-        const val EXTRA_API_KEY = "apiKey"
     }
 }

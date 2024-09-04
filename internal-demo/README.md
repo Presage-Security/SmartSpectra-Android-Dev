@@ -103,6 +103,14 @@ private val resultListener: SmartSpectraResultListener = SmartSpectraResultListe
     }
 ```
 
+For facemesh points, you can set a meshPointsObserver to get the points to process. To see an complete example of using scatter chart to visualize the mesh points, please refer to [MainActivity.kt](src/main/java/com/presagetech/smartspectra_example/MainActivity.kt). Reference to the index of the mesh points and their corresponding face landmarks can be seen [here](https://storage.googleapis.com/mediapipe-assets/documentation/mediapipe_face_landmark_fullsize.png)
+
+```kotlin
+smartSpectraButton.setMeshPointsObserver { meshPoints ->
+    // Process meshPoints here
+}
+```
+
 ### Data Format
 
 The resultsListener contains the following objects:

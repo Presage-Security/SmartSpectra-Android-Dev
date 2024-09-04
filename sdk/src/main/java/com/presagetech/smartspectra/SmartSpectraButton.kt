@@ -4,6 +4,7 @@ import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -18,6 +19,7 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.presagetech.smartspectra.ui.OnboardingTutorialActivity
+import com.presagetech.smartspectra.ui.viewmodel.ScreeningViewModel
 import com.presagetech.smartspectra.utils.PreferencesUtils
 import timber.log.Timber
 import kotlin.math.roundToInt
@@ -42,6 +44,7 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
 
     private var apiKey: String? = null
     private var resultListener: SmartSpectraResultListener? = null
+    private lateinit var screeningViewModel: ScreeningViewModel
 
     init {
         onboardingTutorialHasBeenShown =
@@ -62,14 +65,35 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
 
         infoButton = findViewById(R.id.button_info)
         infoButton.setOnClickListener { infoBottomSheetDialog.show() }
+
+        // In case of unsupported devices
+        if (!isSupportedAbi()) {
+            isEnabled = false
+            checkupButton.isEnabled = false
+            Toast.makeText(context, "Unsupported device (ABI)", Toast.LENGTH_LONG).show()
+            Timber.d("Unsupported device (ABI)")
+            Timber.d("This device ABIs: ${Build.SUPPORTED_ABIS.contentToString()}")
+        } else {
+            // Load necessary libraries
+            System.loadLibrary("mediapipe_jni")
+            System.loadLibrary("opencv_java3")
+        }
+
     }
 
     fun setApiKey(apiKey: String) {
         this.apiKey = apiKey
+        // Initialize the ViewModel with the new API key
+        ScreeningViewModel.initialize(apiKey)
+        screeningViewModel = ScreeningViewModel.getInstance()
     }
 
     fun setResultListener(listener: SmartSpectraResultListener) {
         this.resultListener = listener
+    }
+
+    fun setMeshPointsObserver(observer: (List<Pair<Int, Int>>) -> Unit) {
+        screeningViewModel.observeDenseMeshPoints(observer)
     }
 
     private val infoBottomSheetDialog: BottomSheetDialog by lazy {
@@ -142,7 +166,7 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
 
         val postAgreementActions: () -> Unit = {
             if(agreedToTermsOfService && agreedToPrivacyPolicy) {
-                screeningActivityLauncher.launch(ScreeningContractInput(key))
+                screeningActivityLauncher.launch(ScreeningContractInput())
             }
         }
 
@@ -241,10 +265,12 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
         SmartSpectraSDKConfig.SHOW_FPS = showFps
     }
 
-    internal companion object {
-        init {
-            System.loadLibrary("mediapipe_jni")
-            System.loadLibrary("opencv_java3")
+    private fun isSupportedAbi(): Boolean {
+        Build.SUPPORTED_ABIS.forEach {
+            if (it == "arm64-v8a" || it == "armeabi-v7a") {
+                return true
+            }
         }
+        return false
     }
 }

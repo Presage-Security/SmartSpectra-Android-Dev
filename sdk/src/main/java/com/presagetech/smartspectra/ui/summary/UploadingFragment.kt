@@ -8,19 +8,14 @@ import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.presagetech.smartspectra.R
-import com.presagetech.smartspectra.ui.SmartSpectraActivity
 import com.presagetech.smartspectra.ui.viewmodel.ScreeningViewModel
 import kotlinx.coroutines.launch
 
 class UploadingFragment : Fragment() {
     private val viewModel: ScreeningViewModel by lazy {
-        ViewModelProvider(
-            requireActivity(),
-            (requireActivity() as SmartSpectraActivity).viewModelFactory
-        )[ScreeningViewModel::class.java]
+        ScreeningViewModel.getInstance()
     }
 
     private lateinit var statusText: TextView

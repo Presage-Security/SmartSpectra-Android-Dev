@@ -3,21 +3,23 @@ package com.presagetech.smartspectra_example
 
 import android.graphics.Color
 import android.graphics.Typeface
-import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
 // Plotting imports
+import androidx.core.view.isVisible
 import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.charts.ScatterChart
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.data.ScatterData
+import com.github.mikephil.charting.data.ScatterDataSet
 
 // SmartSpectra SDK Specific Imports
 import com.presagetech.smartspectra.ScreeningResult
@@ -31,6 +33,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var smartSpectraButton: SmartSpectraButton
     private lateinit var resultView: SmartSpectraResultView
     private lateinit var chartContainer: LinearLayout
+    private lateinit var faceMeshContainer: ScatterChart
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +43,7 @@ class MainActivity : AppCompatActivity() {
         smartSpectraButton = findViewById(R.id.btn)
         resultView = findViewById(R.id.result_view)
         chartContainer = findViewById(R.id.chart_container)
+        faceMeshContainer = findViewById(R.id.mesh_container)
 
         smartSpectraButton.setResultListener(resultListener)
         // Valid range for spot time is between 20.0 and 120.0
@@ -49,13 +53,60 @@ class MainActivity : AppCompatActivity() {
         // Your api token from https://physiology.presagetech.com/
         smartSpectraButton.setApiKey("YOUR_API_KEY")
 
-        // In case of unsupported devices
-        if (!isSupportedAbi()) {
-            smartSpectraButton.isEnabled = false
-            Toast.makeText(this, "Unsupported device (ABI)", Toast.LENGTH_LONG).show()
-            Timber.d("Unsupported device (ABI)")
-            Timber.d("This device ABIs: ${Build.SUPPORTED_ABIS.contentToString()}")
+        // Optional: Only need to set it if you want to access face mesh points
+        smartSpectraButton.setMeshPointsObserver{ meshPoints ->
+            handleMeshPoints(meshPoints)
         }
+    }
+
+    private fun handleMeshPoints(meshPoints: List<Pair<Int, Int>>) {
+        Timber.d("Observed mesh points: ${meshPoints.size}")
+        // TODO: Update UI or handle the points as needed
+
+        // Reference the ScatterChart from the layout
+        val chart = faceMeshContainer
+        chart.isVisible = true
+
+
+        // Scale the points and sort by x
+        // Sorting is important here for scatter plot as unsorted points cause negative array size exception in scatter chart
+        // See https://github.com/PhilJay/MPAndroidChart/issues/2074#issuecomment-239936758
+        // --- Important --- we are subtracting the y points for plotting since (0,0) is top-left on the screen but bottom-left on the chart
+        // --- Important --- we are subtracting the x points to mirror horizontally
+        val scaledPoints = meshPoints.map { Entry(1f - it.first / 720f, 1f - it.second / 720f) }
+            .sortedBy { it.x }
+
+        // Create a dataset and add the scaled points
+        val dataSet = ScatterDataSet(scaledPoints, "Mesh Points").apply {
+            setDrawValues(false)
+            scatterShapeSize = 15f
+            setScatterShape(ScatterChart.ScatterShape.CIRCLE)
+        }
+
+        // Create ScatterData with the dataset
+        val scatterData = ScatterData(dataSet)
+
+        // Customize the chart
+        chart.apply {
+            data = scatterData
+            axisLeft.isEnabled = false
+            axisRight.isEnabled = false
+            xAxis.isEnabled = false
+            setTouchEnabled(false)
+            description.isEnabled = false
+            legend.isEnabled = false
+
+            // Set visible range to make x and y axis have the same range
+
+            setVisibleXRange(0f, 1f)
+            setVisibleYRange(0f, 1f, YAxis.AxisDependency.LEFT)
+
+            // Move view to the data
+            moveViewTo(0f, 0f, YAxis.AxisDependency.LEFT)
+        }
+
+        // Refresh the chart
+        chart.invalidate()
     }
 
     private val resultListener: SmartSpectraResultListener = SmartSpectraResultListener { result ->
@@ -107,15 +158,6 @@ class MainActivity : AppCompatActivity() {
                 addChart( it.map { Entry(it.time, it.value) }, "IE", true)
             }
         }
-    }
-
-    private fun isSupportedAbi(): Boolean {
-        Build.SUPPORTED_ABIS.forEach {
-            if (it == "arm64-v8a" || it == "armeabi-v7a") {
-                return true
-            }
-        }
-        return false
     }
 
     private fun addChart(entries: List<Entry>, title: String, showYTicks: Boolean) {
