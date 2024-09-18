@@ -21,6 +21,7 @@ import com.google.mediapipe.framework.Packet
 import com.google.mediapipe.framework.PacketGetter
 import com.google.mediapipe.glutil.EglManager
 import com.presage.physiology.Messages
+import com.presage.physiology.proto.MetricsProto.MetricsBuffer
 import com.presage.physiology.proto.StatusProto
 import com.presagetech.smartspectra.R
 import com.presagetech.smartspectra.SmartSpectraSDKConfig
@@ -45,6 +46,7 @@ class CameraProcessFragment : Fragment() {
     private val STATUS_CODE_STREAM_NAME = "status_code"
     private val TIME_LEFT_STREAM_NAME = "time_left_s"
     private val DENSE_MESH_POINTS_STREAM_NAME = "dense_facemesh_points"
+    private val METRICS_BUFFER_STREAM_NAME = "metrics_buffer"
     // == input side packets
     private val SPOT_DURATION_SIDE_PACKET_NAME = "spot_duration_s"
     private val ENABLE_BP_SIDE_PACKET_NAME = "enable_phasic_bp"
@@ -68,7 +70,6 @@ class CameraProcessFragment : Fragment() {
     private var processor: FrameProcessor? = null
 
     private var timeLeft: Double = 0.0
-    private lateinit var denseMeshPoints: ShortArray
     @Volatile var statusCode: StatusProto.StatusCode = StatusProto.StatusCode.PROCESSING_NOT_STARTED
     private var cameraLockTimeout: Long = 0L
 
@@ -117,6 +118,7 @@ class CameraProcessFragment : Fragment() {
             it.addPacketCallback(OUTPUT_DATA_STREAM_NAME, ::handleJsonDataPacket)
             it.addPacketCallback(STATUS_CODE_STREAM_NAME, ::handleStatusCodePacket)
             it.addPacketCallback(DENSE_MESH_POINTS_STREAM_NAME, ::handleDenseMeshPacket)
+            it.addPacketCallback(METRICS_BUFFER_STREAM_NAME, ::handleMetricsBufferPacket)
             it.preheat()
         }
 
@@ -210,9 +212,17 @@ class CameraProcessFragment : Fragment() {
 
     private fun handleDenseMeshPacket(packet: Packet?) {
         if (packet == null) return
-        denseMeshPoints = PacketGetter.getInt16Vector(packet)
+        val denseMeshPoints = PacketGetter.getInt16Vector(packet)
         viewModel.setDenseMeshPoints(denseMeshPoints)
         packet.release()
+    }
+
+    private fun handleMetricsBufferPacket(packet: Packet?) {
+        if (packet == null) return
+        val metricsBuffer = PacketGetter.getProto(packet, MetricsBuffer.parser())
+
+        Timber.d("Received metrics protobuf")
+        Timber.d(metricsBuffer.metadata.toString())
     }
 
     private fun handleJsonDataPacket(packet: Packet?) {
