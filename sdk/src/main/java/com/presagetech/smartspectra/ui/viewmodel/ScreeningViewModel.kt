@@ -276,12 +276,17 @@ internal class ScreeningViewModel private constructor() : ViewModel() {
         val localZone = ZoneId.systemDefault()
         val utcZonedDateTime = ZonedDateTime.of(raw_datetime, utcZone)
         val upload_date = utcZonedDateTime.withZoneSameInstant(localZone)
-        val hrObject = response.getJSONObject("pulse").getJSONObject("hr")
-        val strictPulseRate = parseFloatToValueArray(hrObject)
-            .map { it.second }.average()
-            .let {
-                if (it.isFinite()) it else 0.0
-            }
+
+        var strictPulseRate = 0.0
+        val hrStrictObj = response.getJSONObject("pulse").getJSONObject("hr_strict")
+        if (hrStrictObj.keys().hasNext()) {
+            val key = hrStrictObj.keys().next()
+            val measurement = hrStrictObj.getJSONObject(key)
+            strictPulseRate =  measurement.getDouble("value")
+        } else {
+            Timber.w("Got no measurement for Strict Pulse rate")
+        }
+
         val pulsePleth: List<Pair<Float, Float>>? = try {
             response
                 .getJSONObject("pulse")
@@ -293,13 +298,16 @@ internal class ScreeningViewModel private constructor() : ViewModel() {
             null
         }
 
-        val rrObject = response.getJSONObject("breath").getJSONObject("rr")
+        var strictBreathingRate = 0.0
+        val rrStrictObj = response.getJSONObject("breath").getJSONObject("rr_strict")
+        if (rrStrictObj.keys().hasNext()) {
+            val key = rrStrictObj.keys().next()
+            val measurement = rrStrictObj.getJSONObject(key)
+            strictBreathingRate =  measurement.getDouble("value")
+        } else {
+            Timber.w("Got no measurement for Strict Breathing rate")
+        }
 
-        val strictBreathingRate = parseFloatToValueArray(rrObject)
-            .map { it.second }.average()
-            .let {
-                if (it.isFinite()) it else 0.0
-            }
         val breathingPleth: List<Pair<Float, Float>>? = try {
             response
                 .getJSONObject("breath")
