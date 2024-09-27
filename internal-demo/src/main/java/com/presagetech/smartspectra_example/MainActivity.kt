@@ -20,11 +20,10 @@ import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.data.ScatterData
 import com.github.mikephil.charting.data.ScatterDataSet
+import com.presage.physiology.proto.MetricsProto.MetricsBuffer
 
 // SmartSpectra SDK Specific Imports
-import com.presagetech.smartspectra.ScreeningResult
 import com.presagetech.smartspectra.SmartSpectraButton
-import com.presagetech.smartspectra.SmartSpectraResultListener
 import com.presagetech.smartspectra.SmartSpectraResultView
 import timber.log.Timber
 
@@ -45,7 +44,6 @@ class MainActivity : AppCompatActivity() {
         chartContainer = findViewById(R.id.chart_container)
         faceMeshContainer = findViewById(R.id.mesh_container)
 
-        smartSpectraButton.setResultListener(resultListener)
         // Valid range for spot time is between 20.0 and 120.0
         smartSpectraButton.setSpotTime(30.0)
         smartSpectraButton.setShowFps(false)
@@ -60,7 +58,8 @@ class MainActivity : AppCompatActivity() {
 
         smartSpectraButton.setMetricsBufferObserver { metricsBuffer ->
             Timber.d("Printing metrics buffer from main activity")
-            Timber.d(metricsBuffer?.metadata.toString())
+            Timber.d(metricsBuffer.metadata.toString())
+            handleMetricsBuffer(metricsBuffer)
         }
     }
 
@@ -114,55 +113,53 @@ class MainActivity : AppCompatActivity() {
         chart.invalidate()
     }
 
-    private val resultListener: SmartSpectraResultListener = SmartSpectraResultListener { result ->
-        resultView.onResult(result) // pass the result to the sdk's result view or handle it as needed
-
+    private fun handleMetricsBuffer(metrics: MetricsBuffer) {
         // Clear the chart container before plotting new results
         chartContainer.removeAllViews()
 
         // Plot the results
-        if (result is ScreeningResult.Success) {
-            result.pulsePleth?.let {
-                addChart( it.map { Entry(it.time, it.value) }, "Pulse Pleth", false)
-            }
-            result.breathingPleth?.let {
-                addChart( it.map { Entry(it.time, it.value) }, "Breathing Pleth", false)
-            }
-            result.pulseValues?.let {
-                addChart( it.map { Entry(it.time, it.value) }, "Pulse Rates", true)
-            }
-            result.pulseConfidence?.let {
-                addChart( it.map { Entry(it.time, it.value) }, "Pulse Rate Confidence", true)
-            }
-            result.hrv?.let {
-                addChart( it.map { Entry(it.time, it.value) }, "Pulse Rate Variability", true)
-            }
-
-            result.breathingValues?.let {
-                addChart( it.map { Entry(it.time, it.value) }, "Breathing Rates", true)
-            }
-            result.breathingConfidence?.let {
-                addChart( it.map { Entry(it.time, it.value) }, "Breathing Rate Confidence", true)
-            }
-            result.breathingAmplitude?.let {
-                addChart( it.map { Entry(it.time, it.value) }, "Breathing Amplitude", true)
-            }
-            result.apnea?.let {
-                addChart( it.map { Entry(it.time, if(it.value) 1f else 0f) }, "Apnea", true)
-            }
-            result.breathingBaseline?.let {
-                addChart( it.map { Entry(it.time, it.value) }, "Breathing Baseline", true)
-            }
-            result.phasic?.let {
-                addChart( it.map { Entry(it.time, it.value) }, "Phasic", true)
-            }
-            result.rrl?.let {
-                addChart( it.map { Entry(it.time, it.value) }, "RRL", true)
-            }
-            result.ie?.let {
-                addChart( it.map { Entry(it.time, it.value) }, "IE", true)
-            }
-        }
+//        if (result is ScreeningResult.Success) {
+//            result.pulsePleth?.let {
+//                addChart( it.map { Entry(it.time, it.value) }, "Pulse Pleth", false)
+//            }
+//            result.breathingPleth?.let {
+//                addChart( it.map { Entry(it.time, it.value) }, "Breathing Pleth", false)
+//            }
+//            result.pulseValues?.let {
+//                addChart( it.map { Entry(it.time, it.value) }, "Pulse Rates", true)
+//            }
+//            result.pulseConfidence?.let {
+//                addChart( it.map { Entry(it.time, it.value) }, "Pulse Rate Confidence", true)
+//            }
+//            result.hrv?.let {
+//                addChart( it.map { Entry(it.time, it.value) }, "Pulse Rate Variability", true)
+//            }
+//
+//            result.breathingValues?.let {
+//                addChart( it.map { Entry(it.time, it.value) }, "Breathing Rates", true)
+//            }
+//            result.breathingConfidence?.let {
+//                addChart( it.map { Entry(it.time, it.value) }, "Breathing Rate Confidence", true)
+//            }
+//            result.breathingAmplitude?.let {
+//                addChart( it.map { Entry(it.time, it.value) }, "Breathing Amplitude", true)
+//            }
+//            result.apnea?.let {
+//                addChart( it.map { Entry(it.time, if(it.value) 1f else 0f) }, "Apnea", true)
+//            }
+//            result.breathingBaseline?.let {
+//                addChart( it.map { Entry(it.time, it.value) }, "Breathing Baseline", true)
+//            }
+//            result.phasic?.let {
+//                addChart( it.map { Entry(it.time, it.value) }, "Phasic", true)
+//            }
+//            result.rrl?.let {
+//                addChart( it.map { Entry(it.time, it.value) }, "RRL", true)
+//            }
+//            result.ie?.let {
+//                addChart( it.map { Entry(it.time, it.value) }, "IE", true)
+//            }
+//        }
     }
 
     private fun addChart(entries: List<Entry>, title: String, showYTicks: Boolean) {

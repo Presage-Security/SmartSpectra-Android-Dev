@@ -1,5 +1,6 @@
 package com.presagetech.smartspectra.ui.screening
 
+import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.os.SystemClock
@@ -75,6 +76,14 @@ class CameraProcessFragment : Fragment() {
     private val viewModel: ScreeningViewModel by lazy {
         ScreeningViewModel.getInstance()
     }
+
+    private var processingState: ProcessingStatus
+        get() = _processingState
+        set(value) {
+            _processingState = value
+            onProcessingStateChanged(value)
+        }
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -166,9 +175,11 @@ class CameraProcessFragment : Fragment() {
         Timber.i("recordButtonClick: isRecording=$isRecording, status_code: $statusCode")
         if (isRecording) {
             resetTimer()
+            processingState = ProcessingStatus.IDLE
         } else {
             if (canRecord()) {
                 startTimer()
+                processingState = ProcessingStatus.PREPROCESSING
             } else {
                 Timber.d("Can't start recording, status code: $statusCode")
             }
@@ -205,6 +216,10 @@ class CameraProcessFragment : Fragment() {
         timerTextView.post {
             timerTextView.text = timeLeft.toInt().toString()
         }
+
+        if (timeLeft == 0.0 && processingState == ProcessingStatus.PREPROCESSING) {
+            processingState = ProcessingStatus.PREPROCESSED
+        }
         packet.release()
     }
 
@@ -222,7 +237,7 @@ class CameraProcessFragment : Fragment() {
         Timber.d("Received metrics protobuf")
         Timber.d(metricsBuffer.metadata.toString())
         viewModel.setMetricsBuffer(metricsBuffer)
-        (requireActivity() as SmartSpectraActivity).openUploadFragment()
+        processingState = ProcessingStatus.DONE
         packet.release()
     }
 
@@ -332,7 +347,49 @@ class CameraProcessFragment : Fragment() {
         }
     }
 
+
+    private fun onProcessingStateChanged(newState: ProcessingStatus) {
+        when (newState) {
+            ProcessingStatus.IDLE -> {
+                Timber.d("Presage Processing idle")
+            }
+
+            ProcessingStatus.PREPROCESSING -> {
+                Timber.d("Presage Processing")
+
+            }
+
+            ProcessingStatus.PREPROCESSED -> {
+                Timber.d("Presage Processed")
+                // TODO: Graph needs to move to a service for this to not hang until graph is done here
+                (requireActivity() as SmartSpectraActivity).openUploadFragment()
+            }
+
+            ProcessingStatus.DONE -> {
+                Timber.d("Got metrics buffer.")
+                requireActivity().let {
+                    it.setResult(Activity.RESULT_OK)
+                    it.finish()
+                }
+
+            }
+
+            ProcessingStatus.ERROR -> {
+                Timber.e("Presage Processing error")
+            }
+        }
+    }
+
     internal companion object {
+        enum class ProcessingStatus {
+            IDLE,
+            PREPROCESSING,
+            PREPROCESSED,
+            DONE,
+            ERROR
+        }
         private const val CAMERA_LOCKING_TIMEOUT = 500L  // ms
+
+        private var _processingState = ProcessingStatus.IDLE
     }
 }

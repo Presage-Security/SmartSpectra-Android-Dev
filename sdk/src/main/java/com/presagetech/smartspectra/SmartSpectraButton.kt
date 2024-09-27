@@ -13,13 +13,12 @@ import android.webkit.WebView
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.presage.physiology.proto.MetricsProto.MetricsBuffer
 import com.presagetech.smartspectra.ui.OnboardingTutorialActivity
+import com.presagetech.smartspectra.ui.SmartSpectraActivity
 import com.presagetech.smartspectra.ui.viewmodel.ScreeningViewModel
 import com.presagetech.smartspectra.utils.PreferencesUtils
 import timber.log.Timber
@@ -42,10 +41,9 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
     private var agreedToTermsOfService: Boolean
     private var agreedToPrivacyPolicy: Boolean
 
-
-    private var apiKey: String? = null
-    private var resultListener: SmartSpectraResultListener? = null
-    private lateinit var screeningViewModel: ScreeningViewModel
+    private val screeningViewModel: ScreeningViewModel by lazy {
+        ScreeningViewModel.getInstance()
+    }
 
     init {
         onboardingTutorialHasBeenShown =
@@ -83,21 +81,14 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
     }
 
     fun setApiKey(apiKey: String) {
-        this.apiKey = apiKey
-        // Initialize the ViewModel with the new API key
-        ScreeningViewModel.initialize(apiKey)
-        screeningViewModel = ScreeningViewModel.getInstance()
-    }
-
-    fun setResultListener(listener: SmartSpectraResultListener) {
-        this.resultListener = listener
+        screeningViewModel.setApiKey(apiKey)
     }
 
     fun setMeshPointsObserver(observer: (List<Pair<Int, Int>>) -> Unit) {
         screeningViewModel.observeDenseMeshPoints(observer)
     }
 
-    fun setMetricsBufferObserver(observer: (MetricsBuffer?) -> Unit) {
+    fun setMetricsBufferObserver(observer: (MetricsBuffer) -> Unit) {
         screeningViewModel.observeMetricsBuffer(observer)
     }
 
@@ -157,21 +148,15 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
         }
     }
 
-    private var screeningActivityLauncher: ActivityResultLauncher<ScreeningContractInput> =
-        (context as AppCompatActivity).registerForActivityResult(ScreeningContract()) {
-            val listener = resultListener ?: throw IllegalStateException("resultListener is null")
-            listener.onResult(it)
-        }
-
     private fun onStartClicked(view: View) {
-        require(resultListener != null) { "Have you forgotten to set the result listener?" }
-        val key = apiKey ?: throw IllegalStateException(
-            "SDK API key is missing. Set via the .setApiKey() method."
-        )
+        // TODO: Check if api key is set, this throws an error if it's not
+        screeningViewModel.getApiKey()
+
 
         val postAgreementActions: () -> Unit = {
             if(agreedToTermsOfService && agreedToPrivacyPolicy) {
-                screeningActivityLauncher.launch(ScreeningContractInput())
+                val intent = Intent(context, SmartSpectraActivity::class.java)
+                context.startActivity(intent)
             }
         }
 
