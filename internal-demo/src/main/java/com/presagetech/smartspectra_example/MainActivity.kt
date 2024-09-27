@@ -57,6 +57,11 @@ class MainActivity : AppCompatActivity() {
         smartSpectraButton.setMeshPointsObserver{ meshPoints ->
             handleMeshPoints(meshPoints)
         }
+
+        smartSpectraButton.setMetricsBufferObserver { metricsBuffer ->
+            Timber.d("Printing metrics buffer from main activity")
+            Timber.d(metricsBuffer?.metadata.toString())
+        }
     }
 
     private fun handleMeshPoints(meshPoints: List<Pair<Int, Int>>) {

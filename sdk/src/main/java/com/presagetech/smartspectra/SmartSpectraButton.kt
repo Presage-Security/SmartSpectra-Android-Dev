@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.presage.physiology.proto.MetricsProto.MetricsBuffer
 import com.presagetech.smartspectra.ui.OnboardingTutorialActivity
 import com.presagetech.smartspectra.ui.viewmodel.ScreeningViewModel
 import com.presagetech.smartspectra.utils.PreferencesUtils
@@ -94,6 +95,10 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
 
     fun setMeshPointsObserver(observer: (List<Pair<Int, Int>>) -> Unit) {
         screeningViewModel.observeDenseMeshPoints(observer)
+    }
+
+    fun setMetricsBufferObserver(observer: (MetricsBuffer?) -> Unit) {
+        screeningViewModel.observeMetricsBuffer(observer)
     }
 
     private val infoBottomSheetDialog: BottomSheetDialog by lazy {

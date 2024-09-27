@@ -32,7 +32,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -73,10 +73,13 @@ dependencies {
     implementation("com.google.flogger:flogger-system-backend:0.6")
     implementation("com.google.code.findbugs:jsr305:3.0.2")
     implementation("com.google.guava:guava:27.0.1-android")
-    implementation("com.google.protobuf:protobuf-java:3.19.3")
 
+    //protobuf dependencies
+    api("com.google.protobuf:protobuf-javalite:3.19.3")
+
+    //TODO: 9/27/24: Verify if we are exposing anything sensitive or unnecessary by using "api" instead of implementation
     // mediapipe java library
-    implementation(files("libs/classes.jar"))
+    api(files("libs/classes.jar"))
 }
 
 task<Javadoc>("androidJavadoc") {

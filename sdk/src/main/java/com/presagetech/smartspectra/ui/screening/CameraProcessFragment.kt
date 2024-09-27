@@ -42,7 +42,6 @@ class CameraProcessFragment : Fragment() {
     private val INPUT_VIDEO_STREAM_NAME = "input_video"
     private val SELECTED_INPUT_STREAM_NAME = "start_button_pre"
     // == output streams
-    private val OUTPUT_DATA_STREAM_NAME = "json_data"
     private val STATUS_CODE_STREAM_NAME = "status_code"
     private val TIME_LEFT_STREAM_NAME = "time_left_s"
     private val DENSE_MESH_POINTS_STREAM_NAME = "dense_facemesh_points"
@@ -115,7 +114,6 @@ class CameraProcessFragment : Fragment() {
             ))
             it.setOnWillAddFrameListener(::handleOnWillAddFrame)
             it.addPacketCallback(TIME_LEFT_STREAM_NAME, ::handleTimeLeftPacket)
-            it.addPacketCallback(OUTPUT_DATA_STREAM_NAME, ::handleJsonDataPacket)
             it.addPacketCallback(STATUS_CODE_STREAM_NAME, ::handleStatusCodePacket)
             it.addPacketCallback(DENSE_MESH_POINTS_STREAM_NAME, ::handleDenseMeshPacket)
             it.addPacketCallback(METRICS_BUFFER_STREAM_NAME, ::handleMetricsBufferPacket)
@@ -223,12 +221,7 @@ class CameraProcessFragment : Fragment() {
 
         Timber.d("Received metrics protobuf")
         Timber.d(metricsBuffer.metadata.toString())
-    }
-
-    private fun handleJsonDataPacket(packet: Packet?) {
-        if (packet == null) return
-        val outputJson = PacketGetter.getJson(packet)
-        viewModel.setJsonData(requireContext(), outputJson)
+        viewModel.setMetricsBuffer(metricsBuffer)
         (requireActivity() as SmartSpectraActivity).openUploadFragment()
         packet.release()
     }

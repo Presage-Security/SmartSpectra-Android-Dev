@@ -1,18 +1,15 @@
 package com.presagetech.smartspectra.ui.viewmodel
 
-import android.content.Context
 import android.os.Parcelable
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.presagetech.smartspectra.SmartSpectraSDKConfig
+import com.presage.physiology.proto.MetricsProto.MetricsBuffer
 import com.presagetech.smartspectra.network.SDKApiService
 import com.presagetech.smartspectra.network.model.ETag
 import com.presagetech.smartspectra.ui.summary.UploadingState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
 import org.json.JSONArray
@@ -20,17 +17,12 @@ import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.FileWriter
 import java.io.IOException
 import java.lang.Integer.min
-import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import java.util.Date
-import java.util.Locale
 import java.util.zip.GZIPOutputStream
 
 internal class ScreeningViewModel private constructor() : ViewModel() {
@@ -49,6 +41,9 @@ internal class ScreeningViewModel private constructor() : ViewModel() {
 
     private val _denseMeshPoints = MutableLiveData<List<Pair<Int, Int>>>()
     val denseMeshPoints: LiveData<List<Pair<Int, Int>>> = _denseMeshPoints
+
+    private val _metricsBuffer = MutableLiveData<MetricsBuffer?>()
+    val metricsBuffer: LiveData<MetricsBuffer?> = _metricsBuffer
 
     private fun initialize(apiKey: String) {
         this.apiKey = apiKey
@@ -72,34 +67,6 @@ internal class ScreeningViewModel private constructor() : ViewModel() {
 
     fun observeDenseMeshPoints(observer: (List<Pair<Int, Int>>) -> Unit) {
         denseMeshPoints.observeForever(observer)
-    }
-
-    fun setJsonData(context: Context, json: String) {
-        jsonData = json
-
-        if (SmartSpectraSDKConfig.SAVE_JSON) {
-            saveJsonLocally(context, json)
-        }
-    }
-
-    private fun saveJsonLocally(context: Context, outputJson: String){
-        viewModelScope.launch(Dispatchers.IO)
-        {
-            val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-            val fileName = "output_$timestamp.json"
-            val file = File(context.filesDir, fileName)
-            if (file.exists()) {
-                file.delete()
-            }
-            try {
-                FileWriter(file).use { fileWriter ->
-                    fileWriter.write(outputJson)
-                }
-                Timber.d("HR JSON written to $fileName")
-            } catch (e: IOException) {
-                Timber.e(e, "Error writing to file $fileName")
-            }
-        }
     }
 
     suspend fun startUploadingProcess() = withContext(Dispatchers.IO) {
@@ -455,7 +422,14 @@ internal class ScreeningViewModel private constructor() : ViewModel() {
         Timber.i("Local=${upload_date}")
         return result
     }
-    
+
+    fun setMetricsBuffer(metricsBuffer: MetricsBuffer?) {
+        _metricsBuffer.postValue(metricsBuffer)
+    }
+
+    fun observeMetricsBuffer(observer: (MetricsBuffer?) -> Unit) {
+        metricsBuffer.observeForever(observer)
+    }
 
     @Parcelize
     data class RetrievedData(
