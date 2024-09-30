@@ -4,7 +4,7 @@
     <color name="blue">#0337F4</color>
     <color name="black">#000000</color>
     <color name="gray">#545454</color>
-    <color name="pink">#f0555c</color>
+    <color name="red">#f0555c</color>
 
     <color name="camera_preview_frame">#dfff</color>
 </resources>
