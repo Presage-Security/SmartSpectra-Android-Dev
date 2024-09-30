@@ -118,48 +118,65 @@ class MainActivity : AppCompatActivity() {
         chartContainer.removeAllViews()
 
         // Plot the results
-//        if (result is ScreeningResult.Success) {
-//            result.pulsePleth?.let {
-//                addChart( it.map { Entry(it.time, it.value) }, "Pulse Pleth", false)
-//            }
-//            result.breathingPleth?.let {
-//                addChart( it.map { Entry(it.time, it.value) }, "Breathing Pleth", false)
-//            }
-//            result.pulseValues?.let {
-//                addChart( it.map { Entry(it.time, it.value) }, "Pulse Rates", true)
-//            }
-//            result.pulseConfidence?.let {
-//                addChart( it.map { Entry(it.time, it.value) }, "Pulse Rate Confidence", true)
-//            }
-//            result.hrv?.let {
-//                addChart( it.map { Entry(it.time, it.value) }, "Pulse Rate Variability", true)
-//            }
-//
-//            result.breathingValues?.let {
-//                addChart( it.map { Entry(it.time, it.value) }, "Breathing Rates", true)
-//            }
-//            result.breathingConfidence?.let {
-//                addChart( it.map { Entry(it.time, it.value) }, "Breathing Rate Confidence", true)
-//            }
-//            result.breathingAmplitude?.let {
-//                addChart( it.map { Entry(it.time, it.value) }, "Breathing Amplitude", true)
-//            }
-//            result.apnea?.let {
-//                addChart( it.map { Entry(it.time, if(it.value) 1f else 0f) }, "Apnea", true)
-//            }
-//            result.breathingBaseline?.let {
-//                addChart( it.map { Entry(it.time, it.value) }, "Breathing Baseline", true)
-//            }
-//            result.phasic?.let {
-//                addChart( it.map { Entry(it.time, it.value) }, "Phasic", true)
-//            }
-//            result.rrl?.let {
-//                addChart( it.map { Entry(it.time, it.value) }, "RRL", true)
-//            }
-//            result.ie?.let {
-//                addChart( it.map { Entry(it.time, it.value) }, "IE", true)
-//            }
-//        }
+        // pulse plots
+        val pulse = metrics.pulse
+        val breathing = metrics.breathing
+        val bloodPressure = metrics.bloodPressure
+        val face = metrics.face
+
+        // Pulse plots
+        if (pulse.traceCount > 0) {
+            addChart(pulse.traceList.map { Entry(it.time, it.value) },  "Pulse Pleth", false)
+        }
+        if (pulse.rateCount > 0) {
+            addChart( pulse.rateList.map { Entry(it.time, it.value) }, "Pulse Rates", true)
+            addChart( pulse.rateList.map { Entry(it.time, it.confidence) }, "Pulse Rate Confidence", true)
+
+        }
+        //TODO: 9/30/24: add this chart when hrv is added to protobuf
+//        addChart( pulse..hrv.map { Entry(it.time, it.value) }, "Pulse Rate Variability", true)
+
+        // Breathing plots
+        if (breathing.upperTraceCount > 0) {
+            addChart(breathing.upperTraceList.map { Entry(it.time, it.value) }, "Breathing Pleth", false)
+        }
+        if (breathing.rateCount > 0) {
+            addChart(breathing.rateList.map { Entry(it.time, it.value) }, "Breathing Rates", true)
+            addChart(breathing.rateList.map { Entry(it.time, it.confidence) }, "Breathing Rate Confidence", true)
+        }
+        if (breathing.amplitudeCount > 0) {
+            addChart(breathing.amplitudeList.map { Entry(it.time, it.value) }, "Breathing Amplitude", true)
+        }
+        if (breathing.apneaCount > 0) {
+            addChart(breathing.apneaList.map { Entry(it.time, if (it.detected) 1f else 0f) }, "Apnea", true)
+        }
+        if (breathing.baselineCount > 0) {
+            addChart(breathing.baselineList.map { Entry(it.time, it.value) }, "Breathing Baseline", true)
+        }
+        if (breathing.respiratoryLineLengthCount > 0) {
+            addChart(breathing.respiratoryLineLengthList.map { Entry(it.time, it.value) }, "Respiratory Line Length", true)
+        }
+        if (breathing.inhaleExhaleRatioCount > 0) {
+            addChart(
+                breathing.inhaleExhaleRatioList.map { Entry(it.time, it.value) },
+                "Inhale-Exhale Ratio",
+                true
+            )
+        }
+
+        // Blood pressure plots
+        if (bloodPressure.phasicCount > 0) {
+            addChart(bloodPressure.phasicList.map { Entry(it.time, it.value) }, "Phasic", true)
+        }
+
+        // Face plots
+        if (face.blinkingCount > 0) {
+            addChart(face.blinkingList.map { Entry(it.time, if (it.detected) 1f else 0f) }, "Blinking", true)
+        }
+        if (face.talkingCount > 0) {
+            addChart(face.talkingList.map { Entry(it.time, if (it.detected) 1f else 0f) }, "Talking", true)
+        }
+
     }
 
     private fun addChart(entries: List<Entry>, title: String, showYTicks: Boolean) {
