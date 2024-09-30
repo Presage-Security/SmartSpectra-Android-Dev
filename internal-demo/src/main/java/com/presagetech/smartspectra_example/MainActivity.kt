@@ -57,8 +57,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         smartSpectraButton.setMetricsBufferObserver { metricsBuffer ->
-            Timber.d("Printing metrics buffer from main activity")
-            Timber.d(metricsBuffer.metadata.toString())
             handleMetricsBuffer(metricsBuffer)
         }
     }
@@ -117,12 +115,13 @@ class MainActivity : AppCompatActivity() {
         // Clear the chart container before plotting new results
         chartContainer.removeAllViews()
 
-        // Plot the results
-        // pulse plots
+        // get the relevant metrics
         val pulse = metrics.pulse
         val breathing = metrics.breathing
         val bloodPressure = metrics.bloodPressure
         val face = metrics.face
+
+        // Plot the results
 
         // Pulse plots
         if (pulse.traceCount > 0) {
