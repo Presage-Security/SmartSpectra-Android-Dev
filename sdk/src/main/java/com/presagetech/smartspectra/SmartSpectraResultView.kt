@@ -16,6 +16,7 @@ class SmartSpectraResultView(
     attrs: AttributeSet?
 ) : LinearLayout(context, attrs) {
     private var resultTextView: TextView
+    private var resultErrorTextView: TextView
     private val viewModel: ScreeningViewModel by lazy {
         ScreeningViewModel.getInstance()
     }
@@ -27,6 +28,7 @@ class SmartSpectraResultView(
 
         LayoutInflater.from(context).inflate(R.layout.view_result, this, true)
         resultTextView = findViewById(R.id.result_text)
+        resultErrorTextView = findViewById(R.id.result_error_text)
 
         viewModel.observeMetricsBuffer { metricsBuffer ->
             updateResultText(metricsBuffer)
@@ -36,12 +38,16 @@ class SmartSpectraResultView(
     private fun updateResultText(metricsBuffer: MetricsBuffer) {
         val strictPulseRate = metricsBuffer.pulse.strict.value.roundToInt()
         val strictBreathingRate = metricsBuffer.breathing.strict.value.roundToInt()
+        val breathingRateText = if (strictBreathingRate == 0) "N/A" else "$strictBreathingRate BPM"
+        val pulseRateText = if (strictPulseRate == 0) "N/A" else "$strictPulseRate BPM"
+
+        resultTextView.text = context.getString(R.string.result_label, breathingRateText, pulseRateText)
+
         if (strictPulseRate == 0 || strictBreathingRate == 0) {
             Timber.w("Measurement insufficent for strict. Strict Pulse rate: ${strictPulseRate}, Strict Breathing rate: ${strictBreathingRate}")
-            resultTextView.text = context.getString(R.string.measurement_failed_hint)
+            resultErrorTextView.visibility = VISIBLE
         } else {
-            resultTextView.text = context.getString(R.string.result_label,
-                strictBreathingRate, strictPulseRate)
+            resultErrorTextView.visibility = GONE
         }
     }
 }
