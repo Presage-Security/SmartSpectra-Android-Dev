@@ -8,7 +8,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.widget.ImageButton
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.Toolbar
@@ -97,6 +99,12 @@ class CameraProcessFragment : Fragment() {
             recordingButton = it.findViewById(R.id.button_recording)
             fpsTextView = it.findViewById(R.id.fps_text_view)
         }
+
+        val infoButton = view.findViewById<ImageButton>(R.id.info_button)
+        infoButton.setOnClickListener {
+            showInfoDialog()
+        }
+
         hintText.setText(R.string.loading_hint)
         recordingButton.setOnClickListener(::recordButtonClickListener)
         previewDisplayView.visibility = View.GONE
@@ -286,6 +294,16 @@ class CameraProcessFragment : Fragment() {
                 fpsTextView.text = context?.getString(R.string.fps_label, roundedFps)
             }
         }
+    }
+
+    private fun showInfoDialog() {
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setTitle("Tip")
+        builder.setMessage("Please ensure the subject’s face, shoulders, and upper chest are in view and remove any clothing that may impede visibility. Please refer to Instructions For Use for more information.")
+        builder.setPositiveButton("OK") { dialog, _ ->
+            dialog.dismiss()
+        }
+        builder.show()
     }
 
     override fun onResume() {

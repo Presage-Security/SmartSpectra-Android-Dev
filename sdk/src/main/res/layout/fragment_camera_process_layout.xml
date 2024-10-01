@@ -54,6 +54,20 @@
         app:layout_constraintStart_toEndOf="@id/view_frame_start"
         app:layout_constraintTop_toTopOf="@id/text_hint" />
 
+    <ImageButton
+        android:id="@+id/info_button"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/info_button_description"
+        android:src="@drawable/ic_info_24"
+        android:padding="0dp"
+        android:elevation="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
     <TextView
         android:id="@+id/button_recording"
         android:layout_width="80dp"
