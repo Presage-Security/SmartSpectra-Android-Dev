@@ -5,7 +5,6 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import com.presage.physiology.proto.MetricsProto.MetricsBuffer
 import com.presagetech.smartspectra.ui.viewmodel.ScreeningViewModel
 import timber.log.Timber
@@ -23,9 +22,6 @@ class SmartSpectraResultView(
 
     init {
         orientation = VERTICAL
-        background =
-            ContextCompat.getDrawable(context, R.drawable.smart_spectra_result_view_background)
-
         LayoutInflater.from(context).inflate(R.layout.view_result, this, true)
         resultTextView = findViewById(R.id.result_text)
         resultErrorTextView = findViewById(R.id.result_error_text)

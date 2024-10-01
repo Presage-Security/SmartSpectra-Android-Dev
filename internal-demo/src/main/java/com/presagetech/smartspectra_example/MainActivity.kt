@@ -23,14 +23,12 @@ import com.github.mikephil.charting.data.ScatterDataSet
 import com.presage.physiology.proto.MetricsProto.MetricsBuffer
 
 // SmartSpectra SDK Specific Imports
-import com.presagetech.smartspectra.SmartSpectraButton
-import com.presagetech.smartspectra.SmartSpectraResultView
+import com.presagetech.smartspectra.SmartSpectraView
 import timber.log.Timber
 
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var smartSpectraButton: SmartSpectraButton
-    private lateinit var resultView: SmartSpectraResultView
+    private lateinit var smartSpectraView: SmartSpectraView
     private lateinit var chartContainer: LinearLayout
     private lateinit var faceMeshContainer: ScatterChart
 
@@ -39,24 +37,27 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         // Setting up SmartSpectra Results/Views
-        smartSpectraButton = findViewById(R.id.btn)
-        resultView = findViewById(R.id.result_view)
+        smartSpectraView = findViewById(R.id.smart_spectra_view)
+        // setup views for plots
         chartContainer = findViewById(R.id.chart_container)
         faceMeshContainer = findViewById(R.id.mesh_container)
 
-        // Valid range for spot time is between 20.0 and 120.0
-        smartSpectraButton.setSpotTime(30.0)
-        smartSpectraButton.setShowFps(false)
-
+        //Required configuration
         // Your api token from https://physiology.presagetech.com/
-        smartSpectraButton.setApiKey("YOUR_API_KEY")
+        smartSpectraView.setApiKey("YOUR_API_KEY")
+
+        // Optional configurations
+        // Valid range for spot time is between 20.0 and 120.0
+        smartSpectraView.setSpotTime(30.0)
+        smartSpectraView.setShowFps(false)
 
         // Optional: Only need to set it if you want to access face mesh points
-        smartSpectraButton.setMeshPointsObserver{ meshPoints ->
+        smartSpectraView.setMeshPointsObserver{ meshPoints ->
             handleMeshPoints(meshPoints)
         }
 
-        smartSpectraButton.setMetricsBufferObserver { metricsBuffer ->
+        // Optional: Only need to set it if you want to access metrics to do any processing
+        smartSpectraView.setMetricsBufferObserver { metricsBuffer ->
             handleMetricsBuffer(metricsBuffer)
         }
     }

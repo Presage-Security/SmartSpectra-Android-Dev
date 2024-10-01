@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:orientation="vertical"
-    tools:parentTag="android.widget.LinearLayout">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/smart_spectra_result_view_background"
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/result_text"
@@ -13,18 +14,16 @@
         android:text="@string/result_label_empty"
         android:textSize="25sp"
         android:textStyle="bold" />
+
     <TextView
         android:id="@+id/result_error_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
+        android:layout_margin="8dp"
         android:gravity="center"
         android:text="@string/measurement_failed_hint"
-        android:textSize="18sp"
         android:textColor="@android:color/holo_red_dark"
+        android:textSize="18sp"
         android:textStyle="bold"
-        android:visibility="gone"
-        />
-
-
-</merge>
+        android:visibility="gone" />
+</LinearLayout>
