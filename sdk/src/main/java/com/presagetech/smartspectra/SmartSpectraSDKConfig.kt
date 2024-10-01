@@ -3,7 +3,6 @@ package com.presagetech.smartspectra
 import timber.log.Timber
 
 internal object SmartSpectraSDKConfig {
-    var SAVE_JSON = false
     var SHOW_FPS = false
 
     // Spot duration
