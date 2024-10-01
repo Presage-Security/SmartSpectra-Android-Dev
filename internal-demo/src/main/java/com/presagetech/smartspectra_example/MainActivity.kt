@@ -24,7 +24,6 @@ import com.presage.physiology.proto.MetricsProto.MetricsBuffer
 
 // SmartSpectra SDK Specific Imports
 import com.presagetech.smartspectra.SmartSpectraView
-import timber.log.Timber
 
 
 class MainActivity : AppCompatActivity() {
@@ -63,7 +62,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleMeshPoints(meshPoints: List<Pair<Int, Int>>) {
-        Timber.d("Observed mesh points: ${meshPoints.size}")
         // TODO: Update UI or handle the points as needed
 
         // Reference the ScatterChart from the layout
