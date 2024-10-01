@@ -44,19 +44,17 @@ dependencyResolutionManagement {
 ## Setup
 
 ### Initialize Components
-In your activity or fragment, initialize the `SmartSpectraButton`, and `SmartSpectraResultView`:
+In your activity or fragment, initialize the `SmartSpectraView` (The view consists of checkup button and result view):
 
 ```kotlin
-import com.presagetech.smartspectra.SmartSpectraButton
-import com.presagetech.smartspectra.SmartSpectraResultView
+import com.presagetech.smartspectra.SmartSpectraView
 
  override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         // Setting up SmartSpectra Results/Views
-        smartSpectraButton = findViewById(R.id.btn)
-        resultView = findViewById(R.id.result_view)
+        smartSpectraView = findViewById(R.id.smart_spectra_view)
      
  }
 ```
@@ -65,13 +63,16 @@ import com.presagetech.smartspectra.SmartSpectraResultView
 You need a valid API key to authenticate your requests:
 
 ```kotlin
-smartSpectraButton.setApiKey("YOUR_API_KEY")
+//Required configuration
+// Your api token from https://physiology.presagetech.com/
+smartSpectraView.setApiKey("YOUR_API_KEY")
 
+// Optional configurations
 // Set measurement duration (valid range for spot time is between 20.0 and 120.0)
 // Defaults to 30 if not specified otherwise
-smartSpectraButton.setSpotTime(30.0)
+smartSpectraView.setSpotTime(30.0)
 //whether to show fps in the previewDisplay
-smartSpectraButton.setShowFps(false)
+smartSpectraView.setShowFps(false)
 ```
 You can obtain an API key from PresageTech's developer portal (https://physiology.presagetech.com/)
 
@@ -87,7 +88,7 @@ import com.presage.physiology.proto.MetricsProto.MetricsBuffer
 override fun onCreate(savedInstanceState: Bundle?) {
     //... 
     //...
-    smartSpectraButton.setMetricsBufferObserver { metricsBuffer ->
+    smartSpectraView.setMetricsBufferObserver { metricsBuffer ->
         // Process meshPoints here
         handleMetricsBuffer(metricsBuffer)
     }
@@ -121,7 +122,7 @@ For facemesh points, you can attach a `meshPointsObserver` to get the mesh point
 override fun onCreate(savedInstanceState: Bundle?) {
     //... 
     //...
-    smartSpectraButton.setMeshPointsObserver { meshPoints ->
+    smartSpectraView.setMeshPointsObserver { meshPoints ->
         // Process meshPoints here
         handleMeshPoints(meshPoints)
     }
