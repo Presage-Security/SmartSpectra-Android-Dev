@@ -219,6 +219,9 @@ class Breathing {
 
 - **`BloodPressure` Class**: Handles blood pressure measurements:
 
+> [!CAUTION]
+> Currently not available publicly, currently returned results are a duplicate of pulse pleth
+
 ```kotlin
 class BloodPressure {
     var phasicList: List<MeasurementWithConfidence>
