@@ -276,9 +276,11 @@ try {
 You can obtain an API key from PresageTech's developer portal (https://physiology.presagetech.com/)
 
 ## Troubleshooting
- 
-For additional support, contact support@presagetech.com or submit a github issue (https://github.com/Presage-Security/SmartSpectra-Android-App/issues)
 
-[//]: # (## Known Bugs)
+For additional support, contact support@presagetech.com or [submit a github issue](https://github.com/Presage-Security/SmartSpectra-Android-App/issues)
 
+### Known Bugs
+
+[//]: # (- Currently, there are no known bugs. If you encounter an issue, please contact support or report it.)
+- Some newer phones are experiencing crash during screening
 
