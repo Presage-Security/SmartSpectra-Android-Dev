@@ -46,7 +46,11 @@ class SmartSpectraActivity : AppCompatActivity() {
     }
 
     fun openUploadFragment() {
-        openFragment(UploadingFragment())
+        // TODO: 9/30/23: See if there is a better way to achieve this
+        supportFragmentManager.beginTransaction()
+            .add(R.id.host_fragment, UploadingFragment())
+            .addToBackStack(null)
+            .commit()
     }
 
     private fun openFragment(fragment: Fragment) {

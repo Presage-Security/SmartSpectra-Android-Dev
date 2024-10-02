@@ -1,5 +1,6 @@
 package com.presagetech.smartspectra.ui.screening
 
+import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.os.SystemClock
@@ -7,7 +8,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.widget.ImageButton
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.Toolbar
@@ -21,6 +24,7 @@ import com.google.mediapipe.framework.Packet
 import com.google.mediapipe.framework.PacketGetter
 import com.google.mediapipe.glutil.EglManager
 import com.presage.physiology.Messages
+import com.presage.physiology.proto.MetricsProto.MetricsBuffer
 import com.presage.physiology.proto.StatusProto
 import com.presagetech.smartspectra.R
 import com.presagetech.smartspectra.SmartSpectraSDKConfig
@@ -41,10 +45,10 @@ class CameraProcessFragment : Fragment() {
     private val INPUT_VIDEO_STREAM_NAME = "input_video"
     private val SELECTED_INPUT_STREAM_NAME = "start_button_pre"
     // == output streams
-    private val OUTPUT_DATA_STREAM_NAME = "json_data"
     private val STATUS_CODE_STREAM_NAME = "status_code"
     private val TIME_LEFT_STREAM_NAME = "time_left_s"
     private val DENSE_MESH_POINTS_STREAM_NAME = "dense_facemesh_points"
+    private val METRICS_BUFFER_STREAM_NAME = "metrics_buffer"
     // == input side packets
     private val SPOT_DURATION_SIDE_PACKET_NAME = "spot_duration_s"
     private val ENABLE_BP_SIDE_PACKET_NAME = "enable_phasic_bp"
@@ -68,13 +72,20 @@ class CameraProcessFragment : Fragment() {
     private var processor: FrameProcessor? = null
 
     private var timeLeft: Double = 0.0
-    private lateinit var denseMeshPoints: ShortArray
     @Volatile var statusCode: StatusProto.StatusCode = StatusProto.StatusCode.PROCESSING_NOT_STARTED
     private var cameraLockTimeout: Long = 0L
 
     private val viewModel: ScreeningViewModel by lazy {
         ScreeningViewModel.getInstance()
     }
+
+    private var processingState: ProcessingStatus
+        get() = _processingState
+        set(value) {
+            _processingState = value
+            onProcessingStateChanged(value)
+        }
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -88,6 +99,12 @@ class CameraProcessFragment : Fragment() {
             recordingButton = it.findViewById(R.id.button_recording)
             fpsTextView = it.findViewById(R.id.fps_text_view)
         }
+
+        val infoButton = view.findViewById<ImageButton>(R.id.info_button)
+        infoButton.setOnClickListener {
+            showInfoDialog()
+        }
+
         hintText.setText(R.string.loading_hint)
         recordingButton.setOnClickListener(::recordButtonClickListener)
         previewDisplayView.visibility = View.GONE
@@ -114,9 +131,9 @@ class CameraProcessFragment : Fragment() {
             ))
             it.setOnWillAddFrameListener(::handleOnWillAddFrame)
             it.addPacketCallback(TIME_LEFT_STREAM_NAME, ::handleTimeLeftPacket)
-            it.addPacketCallback(OUTPUT_DATA_STREAM_NAME, ::handleJsonDataPacket)
             it.addPacketCallback(STATUS_CODE_STREAM_NAME, ::handleStatusCodePacket)
             it.addPacketCallback(DENSE_MESH_POINTS_STREAM_NAME, ::handleDenseMeshPacket)
+            it.addPacketCallback(METRICS_BUFFER_STREAM_NAME, ::handleMetricsBufferPacket)
             it.preheat()
         }
 
@@ -166,9 +183,11 @@ class CameraProcessFragment : Fragment() {
         Timber.i("recordButtonClick: isRecording=$isRecording, status_code: $statusCode")
         if (isRecording) {
             resetTimer()
+            processingState = ProcessingStatus.IDLE
         } else {
             if (canRecord()) {
                 startTimer()
+                processingState = ProcessingStatus.PREPROCESSING
             } else {
                 Timber.d("Can't start recording, status code: $statusCode")
             }
@@ -205,21 +224,28 @@ class CameraProcessFragment : Fragment() {
         timerTextView.post {
             timerTextView.text = timeLeft.toInt().toString()
         }
+
+        if (timeLeft == 0.0 && processingState == ProcessingStatus.PREPROCESSING) {
+            processingState = ProcessingStatus.PREPROCESSED
+        }
         packet.release()
     }
 
     private fun handleDenseMeshPacket(packet: Packet?) {
         if (packet == null) return
-        denseMeshPoints = PacketGetter.getInt16Vector(packet)
+        val denseMeshPoints = PacketGetter.getInt16Vector(packet)
         viewModel.setDenseMeshPoints(denseMeshPoints)
         packet.release()
     }
 
-    private fun handleJsonDataPacket(packet: Packet?) {
+    private fun handleMetricsBufferPacket(packet: Packet?) {
         if (packet == null) return
-        val outputJson = PacketGetter.getJson(packet)
-        viewModel.setJsonData(requireContext(), outputJson)
-        (requireActivity() as SmartSpectraActivity).openUploadFragment()
+        val metricsBuffer = PacketGetter.getProto(packet, MetricsBuffer.parser())
+
+        Timber.d("Received metrics protobuf")
+        Timber.d(metricsBuffer.metadata.toString())
+        viewModel.setMetricsBuffer(metricsBuffer)
+        processingState = ProcessingStatus.DONE
         packet.release()
     }
 
@@ -268,6 +294,16 @@ class CameraProcessFragment : Fragment() {
                 fpsTextView.text = context?.getString(R.string.fps_label, roundedFps)
             }
         }
+    }
+
+    private fun showInfoDialog() {
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setTitle("Tip")
+        builder.setMessage("Please ensure the subject’s face, shoulders, and upper chest are in view and remove any clothing that may impede visibility. Please refer to Instructions For Use for more information.")
+        builder.setPositiveButton("OK") { dialog, _ ->
+            dialog.dismiss()
+        }
+        builder.show()
     }
 
     override fun onResume() {
@@ -329,7 +365,49 @@ class CameraProcessFragment : Fragment() {
         }
     }
 
+
+    private fun onProcessingStateChanged(newState: ProcessingStatus) {
+        when (newState) {
+            ProcessingStatus.IDLE -> {
+                Timber.d("Presage Processing idle")
+            }
+
+            ProcessingStatus.PREPROCESSING -> {
+                Timber.d("Presage Processing")
+
+            }
+
+            ProcessingStatus.PREPROCESSED -> {
+                Timber.d("Presage Processed")
+                // TODO: Graph needs to move to a service for this to not hang until graph is done here
+                (requireActivity() as SmartSpectraActivity).openUploadFragment()
+            }
+
+            ProcessingStatus.DONE -> {
+                Timber.d("Got metrics buffer.")
+                requireActivity().let {
+                    it.setResult(Activity.RESULT_OK)
+                    it.finish()
+                }
+
+            }
+
+            ProcessingStatus.ERROR -> {
+                Timber.e("Presage Processing error")
+            }
+        }
+    }
+
     internal companion object {
+        enum class ProcessingStatus {
+            IDLE,
+            PREPROCESSING,
+            PREPROCESSED,
+            DONE,
+            ERROR
+        }
         private const val CAMERA_LOCKING_TIMEOUT = 500L  // ms
+
+        private var _processingState = ProcessingStatus.IDLE
     }
 }

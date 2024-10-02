@@ -5,45 +5,46 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.core.content.ContextCompat
+import com.presage.physiology.proto.MetricsProto.MetricsBuffer
+import com.presagetech.smartspectra.ui.viewmodel.ScreeningViewModel
+import timber.log.Timber
 import kotlin.math.roundToInt
 
 class SmartSpectraResultView(
     context: Context,
     attrs: AttributeSet?
-) : LinearLayout(context, attrs), SmartSpectraResultListener {
+) : LinearLayout(context, attrs) {
     private var resultTextView: TextView
+    private var resultErrorTextView: TextView
+    private val viewModel: ScreeningViewModel by lazy {
+        ScreeningViewModel.getInstance()
+    }
 
     init {
         orientation = VERTICAL
-        background =
-            ContextCompat.getDrawable(context, R.drawable.smart_spectra_result_view_background)
-
         LayoutInflater.from(context).inflate(R.layout.view_result, this, true)
         resultTextView = findViewById(R.id.result_text)
-    }
+        resultErrorTextView = findViewById(R.id.result_error_text)
 
-    override fun onResult(result: ScreeningResult) {
-        when (result) {
-            is ScreeningResult.Success -> success(result)
-            is ScreeningResult.Failed -> failed()
+        viewModel.observeMetricsBuffer { metricsBuffer ->
+            updateResultText(metricsBuffer)
         }
     }
 
-    private fun success(result: ScreeningResult.Success) {
-        val strictBreathingRate = result.strictBreathingRate.roundToInt()
-        val strictPulseRate = result.strictPulseRate.roundToInt()
+    private fun updateResultText(metricsBuffer: MetricsBuffer) {
+        val strictPulseRate = metricsBuffer.pulse.strict.value.roundToInt()
+        val strictBreathingRate = metricsBuffer.breathing.strict.value.roundToInt()
+        val breathingRateText = if (strictBreathingRate == 0) "N/A" else "$strictBreathingRate BPM"
+        val pulseRateText = if (strictPulseRate == 0) "N/A" else "$strictPulseRate BPM"
 
-        if (strictBreathingRate == 0 || strictPulseRate == 0) {
-            failed()
-            return
+        resultTextView.text = context.getString(R.string.result_label, breathingRateText, pulseRateText)
+
+        if (strictPulseRate == 0 || strictBreathingRate == 0) {
+            Timber.w("Measurement insufficent for strict. Strict Pulse rate: ${strictPulseRate}, Strict Breathing rate: ${strictBreathingRate}")
+            resultErrorTextView.visibility = VISIBLE
+        } else {
+            resultErrorTextView.visibility = GONE
         }
-        resultTextView.text = context.getString(R.string.result_label,
-            strictBreathingRate, strictPulseRate)
-    }
-
-    private fun failed() {
-        resultTextView.text = context.getString(R.string.measurement_failed_hint)
     }
 }
 
