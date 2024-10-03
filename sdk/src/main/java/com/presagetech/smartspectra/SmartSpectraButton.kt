@@ -4,7 +4,6 @@ import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -13,12 +12,11 @@ import android.webkit.WebView
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.presagetech.smartspectra.ui.OnboardingTutorialActivity
+import com.presagetech.smartspectra.ui.SmartSpectraActivity
 import com.presagetech.smartspectra.ui.viewmodel.ScreeningViewModel
 import com.presagetech.smartspectra.utils.PreferencesUtils
 import timber.log.Timber
@@ -41,10 +39,9 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
     private var agreedToTermsOfService: Boolean
     private var agreedToPrivacyPolicy: Boolean
 
-
-    private var apiKey: String? = null
-    private var resultListener: SmartSpectraResultListener? = null
-    private lateinit var screeningViewModel: ScreeningViewModel
+    private val screeningViewModel: ScreeningViewModel by lazy {
+        ScreeningViewModel.getInstance()
+    }
 
     init {
         onboardingTutorialHasBeenShown =
@@ -65,35 +62,6 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
 
         infoButton = findViewById(R.id.button_info)
         infoButton.setOnClickListener { infoBottomSheetDialog.show() }
-
-        // In case of unsupported devices
-        if (!isSupportedAbi()) {
-            isEnabled = false
-            checkupButton.isEnabled = false
-            Toast.makeText(context, "Unsupported device (ABI)", Toast.LENGTH_LONG).show()
-            Timber.d("Unsupported device (ABI)")
-            Timber.d("This device ABIs: ${Build.SUPPORTED_ABIS.contentToString()}")
-        } else {
-            // Load necessary libraries
-            System.loadLibrary("mediapipe_jni")
-            System.loadLibrary("opencv_java3")
-        }
-
-    }
-
-    fun setApiKey(apiKey: String) {
-        this.apiKey = apiKey
-        // Initialize the ViewModel with the new API key
-        ScreeningViewModel.initialize(apiKey)
-        screeningViewModel = ScreeningViewModel.getInstance()
-    }
-
-    fun setResultListener(listener: SmartSpectraResultListener) {
-        this.resultListener = listener
-    }
-
-    fun setMeshPointsObserver(observer: (List<Pair<Int, Int>>) -> Unit) {
-        screeningViewModel.observeDenseMeshPoints(observer)
     }
 
     private val infoBottomSheetDialog: BottomSheetDialog by lazy {
@@ -152,21 +120,15 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
         }
     }
 
-    private var screeningActivityLauncher: ActivityResultLauncher<ScreeningContractInput> =
-        (context as AppCompatActivity).registerForActivityResult(ScreeningContract()) {
-            val listener = resultListener ?: throw IllegalStateException("resultListener is null")
-            listener.onResult(it)
-        }
-
     private fun onStartClicked(view: View) {
-        require(resultListener != null) { "Have you forgotten to set the result listener?" }
-        val key = apiKey ?: throw IllegalStateException(
-            "SDK API key is missing. Set via the .setApiKey() method."
-        )
+        // TODO: Check if api key is set, this throws an error if it's not
+        screeningViewModel.getApiKey()
+
 
         val postAgreementActions: () -> Unit = {
             if(agreedToTermsOfService && agreedToPrivacyPolicy) {
-                screeningActivityLauncher.launch(ScreeningContractInput())
+                val intent = Intent(context, SmartSpectraActivity::class.java)
+                context.startActivity(intent)
             }
         }
 
@@ -255,22 +217,5 @@ class SmartSpectraButton(context: Context, attrs: AttributeSet?) : LinearLayout(
     private fun dpToPx(dp: Int): Int {
         val density = context.resources.displayMetrics.density
         return (dp * density).roundToInt()
-    }
-
-    fun setSpotTime(spotDuration: Double) {
-        SmartSpectraSDKConfig.spotDuration = spotDuration
-    }
-
-    fun setShowFps(showFps: Boolean) {
-        SmartSpectraSDKConfig.SHOW_FPS = showFps
-    }
-
-    private fun isSupportedAbi(): Boolean {
-        Build.SUPPORTED_ABIS.forEach {
-            if (it == "arm64-v8a" || it == "armeabi-v7a") {
-                return true
-            }
-        }
-        return false
     }
 }
