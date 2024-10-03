@@ -22,6 +22,7 @@
 
 # Keep all classes from com.presage.physiology package
 -keep class com.presage.physiology.** { *; }
+-keep class com.presagetech.smartspectra.** { *; }
 
 # Ignore mediapipe classes
 -dontwarn com.google.mediapipe.**
