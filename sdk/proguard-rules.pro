@@ -19,3 +19,9 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Keep all classes from com.presage.physiology package
+-keep class com.presage.physiology.** { *; }
+
+# Ignore mediapipe classes
+-dontwarn com.google.mediapipe.**
