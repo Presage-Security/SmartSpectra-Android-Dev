@@ -32,7 +32,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = true
+            isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -108,7 +108,7 @@ publishing {
             }
             groupId = "com.presagetech"
             artifactId = "smartspectra"
-	    version = "1.0.13-SNAPSHOT"
+	    version = "1.0.14-SNAPSHOT"
             pom {
                 name.set("Physiology SDK")
                 description.set("Heart and respiration rate measurement by Presage Technologies")
