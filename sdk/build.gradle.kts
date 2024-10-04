@@ -31,6 +31,14 @@ android {
     }
 
     buildTypes {
+        debug {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android.txt"),
+                "proguard-rules-debug.pro"
+            )
+            isJniDebuggable = true
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
