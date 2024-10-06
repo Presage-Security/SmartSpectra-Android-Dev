@@ -73,6 +73,7 @@ dependencies {
     implementation("com.google.flogger:flogger-system-backend:0.6")
     implementation("com.google.code.findbugs:jsr305:3.0.2")
     implementation("com.google.guava:guava:27.0.1-android")
+    implementation ("org.opencv:opencv:4.10.0")
 
     //protobuf dependencies
     api("com.google.protobuf:protobuf-javalite:3.19.3")
