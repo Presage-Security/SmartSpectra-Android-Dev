@@ -14,15 +14,8 @@
 
 # Uncomment this to preserve the line number information for
 # debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+-keepattributes SourceFile,LineNumberTable
 
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
-#-renamesourcefileattribute SourceFile
-
-# Keep all classes from com.presage.physiology package
--keep class com.presage.physiology.** { *; }
--keep class com.presagetech.smartspectra.** { *; }
-
-# Ignore mediapipe classes
--dontwarn com.google.mediapipe.**
+-renamesourcefileattribute SourceFile
