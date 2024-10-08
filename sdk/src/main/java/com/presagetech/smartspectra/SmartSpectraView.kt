@@ -9,6 +9,7 @@ import android.widget.LinearLayout
 import android.widget.Toast
 import com.presage.physiology.proto.MetricsProto.MetricsBuffer
 import com.presagetech.smartspectra.ui.viewmodel.ScreeningViewModel
+import org.opencv.android.OpenCVLoader
 import timber.log.Timber
 
 class SmartSpectraView (
@@ -44,7 +45,12 @@ class SmartSpectraView (
         } else {
             // Load necessary libraries
             System.loadLibrary("mediapipe_jni")
-            System.loadLibrary("opencv_java3")
+            if (OpenCVLoader.initLocal()) {
+                Timber.i("OpenCV loaded successfully");
+            } else {
+                Timber.e("OpenCV initialization failed!");
+            }
+
         }
     }
 
