@@ -281,6 +281,5 @@ For additional support, contact support@presagetech.com or [submit a github issu
 
 ### Known Bugs
 
-[//]: # (- Currently, there are no known bugs. If you encounter an issue, please contact support or report it.)
-- Some newer phones are experiencing crash during screening
+- Currently, there are no known bugs. If you encounter an issue, please contact support or report it.
 
