@@ -228,14 +228,12 @@ class CameraProcessFragment : Fragment() {
         if (timeLeft == 0.0 && processingState == ProcessingStatus.PREPROCESSING) {
             processingState = ProcessingStatus.PREPROCESSED
         }
-        packet.release()
     }
 
     private fun handleDenseMeshPacket(packet: Packet?) {
         if (packet == null) return
         val denseMeshPoints = PacketGetter.getInt16Vector(packet)
         viewModel.setDenseMeshPoints(denseMeshPoints)
-        packet.release()
     }
 
     private fun handleMetricsBufferPacket(packet: Packet?) {
@@ -246,7 +244,6 @@ class CameraProcessFragment : Fragment() {
         Timber.d(metricsBuffer.metadata.toString())
         viewModel.setMetricsBuffer(metricsBuffer)
         processingState = ProcessingStatus.DONE
-        packet.release()
     }
 
     private fun handleStatusCodePacket(packet: Packet?) {
@@ -276,8 +273,6 @@ class CameraProcessFragment : Fragment() {
                 }
             }
         }
-
-        packet.release()
     }
 
     private fun calculateAndSetFPS(timestamp: Long) {
