@@ -73,6 +73,9 @@ smartSpectraView.setApiKey("YOUR_API_KEY")
 smartSpectraView.setSpotTime(30.0)
 //whether to show fps in the previewDisplay
 smartSpectraView.setShowFps(false)
+// Whether to add a recording delay after start button is pressed
+//Recording delay defaults to 3 if not provided
+smartSpectraView.setRecordingDelay(3)
 ```
 You can obtain an API key from PresageTech's developer portal (https://physiology.presagetech.com/)
 

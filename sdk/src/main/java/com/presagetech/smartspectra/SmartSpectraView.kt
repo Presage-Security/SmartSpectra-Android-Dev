@@ -83,4 +83,8 @@ class SmartSpectraView (
         return false
     }
 
+    fun setRecordingDelay(recordingDelay: Int) {
+        SmartSpectraSDKConfig.recordingDelay = recordingDelay
+    }
+
 }

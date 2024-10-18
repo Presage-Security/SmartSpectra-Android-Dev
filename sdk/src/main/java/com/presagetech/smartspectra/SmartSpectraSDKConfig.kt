@@ -24,4 +24,5 @@ internal object SmartSpectraSDKConfig {
 
     const val ENABLE_BP = false
     const val MODEL_DIRECTORY = "graph/models"
+    internal var recordingDelay = 3
 }
