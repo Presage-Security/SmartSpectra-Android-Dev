@@ -21,4 +21,6 @@
     <string name="open_settings">Open settings</string>
     <string name="retry">Retry</string>
     <string name="info_button_description">Show screening tips</string>
+    <string name="navigation_hint_start">Tap to advance</string>
+    <string name="navigation_hint_end">Tap to dismiss</string>
 </resources>

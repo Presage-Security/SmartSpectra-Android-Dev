@@ -2,6 +2,7 @@ package com.presagetech.smartspectra.ui
 
 import android.os.Bundle
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.presagetech.smartspectra.R
@@ -9,11 +10,14 @@ import com.presagetech.smartspectra.utils.PreferencesUtils
 
 class OnboardingTutorialActivity : AppCompatActivity() {
 
-    private var tutorialImageView: ImageView? = null
-    private var tutorialDescriptionTextView: TextView? = null
+    private lateinit var tutorialImageView: ImageView
+    private lateinit var tutorialDescriptionTextView: TextView
+    private lateinit var navigationHintTextView: TextView
+
     private var counter: Int = 0
     private lateinit var tutorialImages: List<Int>
     private lateinit var descriptions: Array<String>
+    private lateinit var navigationDots: Array<ImageView?>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,6 +25,8 @@ class OnboardingTutorialActivity : AppCompatActivity() {
 
         tutorialImageView = findViewById(R.id.tutorial_image)
         tutorialDescriptionTextView = findViewById(R.id.tutorial_description)
+        navigationHintTextView = findViewById(R.id.navigation_hint)
+
 
         // Load the tutorial images and descriptions
         tutorialImages = listOf (
@@ -34,11 +40,14 @@ class OnboardingTutorialActivity : AppCompatActivity() {
         )
         descriptions = resources.getStringArray(R.array.tutorial_descriptions)
 
+        //initialize navigation dots
+        initializeNavigationDots()
+
         // Initialize the first tutorial step
         updateTutorialStep()
 
         // Set up click listener to go to the next tutorial step
-        tutorialImageView?.setOnClickListener {
+        tutorialImageView.setOnClickListener {
             counter++
             if (counter < tutorialImages.size) {
                 updateTutorialStep()
@@ -46,13 +55,49 @@ class OnboardingTutorialActivity : AppCompatActivity() {
                 // Finish the tutorial and close the activity
                 PreferencesUtils.saveBoolean(this, PreferencesUtils.ONBOARDING_TUTORIAL_KEY, true)
                 finish()
+
             }
         }
     }
 
+    private fun initializeNavigationDots() {
+        val dotsLayout = findViewById<LinearLayout>(R.id.navigation_dots)
+        navigationDots = arrayOfNulls(tutorialImages.size)
+
+        for (i in navigationDots.indices) {
+            navigationDots[i] = ImageView(this).apply {
+                setImageResource(R.drawable.navigation_dot_inactive)  // Inactive drawable
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    setMargins(8, 0, 8, 0)  // Margin between dots
+                }
+            }
+            dotsLayout.addView(navigationDots[i])
+        }
+    }
+
+    private fun updateNavigationDotColors(currentPosition: Int) {
+        // Reset all dots to inactive color
+        for (i in navigationDots.indices) {
+            navigationDots[i]?.setImageResource(R.drawable.navigation_dot_inactive)
+        }
+        // Highlight the current dot
+        navigationDots[currentPosition]?.setImageResource(R.drawable.navigation_dot_active)
+    }
+
     private fun updateTutorialStep() {
-        tutorialImageView?.setImageResource(tutorialImages[counter])
-        tutorialDescriptionTextView?.text = descriptions[counter]
-        tutorialImageView?.contentDescription = descriptions[counter]
+        tutorialImageView.setImageResource(tutorialImages[counter])
+        tutorialDescriptionTextView.text = descriptions[counter]
+        tutorialImageView.contentDescription = descriptions[counter]
+
+        if (counter == tutorialImages.size -1) {
+            navigationHintTextView.text = resources.getText(R.string.navigation_hint_end)
+        } else {
+            navigationHintTextView.text = resources.getText(R.string.navigation_hint_start)
+        }
+
+        updateNavigationDotColors(counter)
     }
 }

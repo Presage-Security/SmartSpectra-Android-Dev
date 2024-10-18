@@ -3,6 +3,7 @@ package com.presagetech.smartspectra.ui.screening
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
@@ -74,6 +75,7 @@ class CameraProcessFragment : Fragment() {
     private var timeLeft: Double = 0.0
     @Volatile var statusCode: StatusProto.StatusCode = StatusProto.StatusCode.PROCESSING_NOT_STARTED
     private var cameraLockTimeout: Long = 0L
+    private var countdownTimer: CountDownTimer? = null
 
     private val viewModel: ScreeningViewModel by lazy {
         ScreeningViewModel.getInstance()
@@ -85,6 +87,14 @@ class CameraProcessFragment : Fragment() {
             _processingState = value
             onProcessingStateChanged(value)
         }
+    private var buttonState: ButtonState
+        get() = _buttonState
+        set(value) {
+            _buttonState = value
+            onButtonStateChanged(value)
+        }
+
+    private var _buttonState = ButtonState.READY
 
 
     override fun onCreateView(
@@ -180,37 +190,66 @@ class CameraProcessFragment : Fragment() {
 
     @Suppress("UNUSED_PARAMETER")
     private fun recordButtonClickListener(view: View) {
-        Timber.i("recordButtonClick: isRecording=$isRecording, status_code: $statusCode")
-        if (isRecording) {
-            resetTimer()
-            processingState = ProcessingStatus.IDLE
-        } else {
-            if (canRecord()) {
-                startTimer()
-                processingState = ProcessingStatus.PREPROCESSING
-            } else {
-                Timber.d("Can't start recording, status code: $statusCode")
+        when (buttonState) {
+            ButtonState.READY -> {
+                startCountdown {
+                    startRecording()
+                    buttonState = ButtonState.RUNNING
+                    processingState = ProcessingStatus.PREPROCESSING
+                }
+            }
+            ButtonState.COUNTDOWN -> {
+                buttonState = ButtonState.READY
+            }
+            ButtonState.RUNNING -> {
+                stopRecording()
+                processingState = ProcessingStatus.IDLE
+                buttonState = ButtonState.READY
+            }
+            ButtonState.DISABLE -> {
+                Timber.d("recordButton is disabled: status code: $statusCode")
             }
         }
     }
 
-    private fun startTimer() {
+    private fun startCountdown(onCountdownFinish: () -> Unit) {
+        buttonState = ButtonState.COUNTDOWN
+        countdownTimer = object : CountDownTimer(SmartSpectraSDKConfig.recordingDelay * 1000L, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                if (buttonState == ButtonState.COUNTDOWN) {
+                    val secondsLeft = (millisUntilFinished / 1000)
+                    recordingButton.text = secondsLeft.toString()
+                } else {
+                    countdownTimer?.cancel()
+                }
+            }
+
+            override fun onFinish() {
+                if (buttonState == ButtonState.COUNTDOWN) {
+                    // call the closure if the button state is still countdown
+                    onCountdownFinish()
+                }
+            }
+        }.start()
+    }
+
+    private fun startRecording() {
         cameraHelper?.toggleCameraControl(locked = true)
         cameraLockTimeout = SystemClock.elapsedRealtime() + CAMERA_LOCKING_TIMEOUT
         isRecording = true
-        recordingButton.setText(R.string.stop)
+        buttonState = ButtonState.RUNNING
     }
 
-    private fun resetTimer() {
+    private fun stopRecording() {
         cameraHelper?.toggleCameraControl(locked = false)
         cameraLockTimeout = 0L
         isRecording = false
-        recordingButton.setText(R.string.record)
+        buttonState = ButtonState.READY
     }
 
     private fun handleOnWillAddFrame(timestamp: Long) {
         val processor = processor ?: throw IllegalStateException()
-        val value = isRecording && SystemClock.elapsedRealtime() > cameraLockTimeout
+        val value = (buttonState == ButtonState.RUNNING) && SystemClock.elapsedRealtime() > cameraLockTimeout
         processor
             .graph
             .addPacketToInputStream(
@@ -262,14 +301,14 @@ class CameraProcessFragment : Fragment() {
                 hintText.text = Messages.getStatusHint(statusCode)
             }
             recordingButton.post {
-                if (canRecord()) {
-                    recordingButton.setBackgroundResource(R.drawable.record_background)
+                buttonState = if (canRecord()) {
                     if(isRecording) {
-                        recordingButton.setText(R.string.stop)
+                        ButtonState.RUNNING
+                    } else {
+                        ButtonState.READY
                     }
                 } else {
-                    recordingButton.setBackgroundResource(R.drawable.record_background_disabled)
-                    recordingButton.setText(R.string.record)
+                    ButtonState.DISABLE
                 }
             }
         }
@@ -313,7 +352,7 @@ class CameraProcessFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
-        resetTimer()
+        stopRecording()
         // Hide preview display until we re-open the camera again.
         previewDisplayView.visibility = View.GONE
         //release the resources
@@ -393,6 +432,31 @@ class CameraProcessFragment : Fragment() {
         }
     }
 
+    private fun onButtonStateChanged(newState: ButtonState) {
+        when (newState) {
+            ButtonState.DISABLE -> {
+                recordingButton.text = getString(R.string.record)
+                recordingButton.textSize = 20.0f
+                recordingButton.setBackgroundResource(R.drawable.record_background_disabled)
+            }
+            ButtonState.READY -> {
+                recordingButton.text = getString(R.string.record)
+                recordingButton.textSize = 20.0f
+                recordingButton.setBackgroundResource(R.drawable.record_background)
+            }
+            ButtonState.COUNTDOWN -> {
+                recordingButton.text = SmartSpectraSDKConfig.recordingDelay.toString()
+                recordingButton.setBackgroundResource(R.drawable.record_background)
+                recordingButton.textSize = 40.0f
+            }
+            ButtonState.RUNNING -> {
+                recordingButton.text = getString(R.string.stop)
+                recordingButton.textSize = 20.0f
+                recordingButton.setBackgroundResource(R.drawable.record_background)
+            }
+        }
+    }
+
     internal companion object {
         enum class ProcessingStatus {
             IDLE,
@@ -400,6 +464,13 @@ class CameraProcessFragment : Fragment() {
             PREPROCESSED,
             DONE,
             ERROR
+        }
+
+        enum class ButtonState {
+            DISABLE,
+            READY,
+            COUNTDOWN,
+            RUNNING
         }
         private const val CAMERA_LOCKING_TIMEOUT = 500L  // ms
 
